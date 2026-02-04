@@ -1,0 +1,6 @@
+id,title,artist,language,era,genre,mood,tempo,vocal_type,artist_type,popularity
+1,Shape of You,Ed Sheeran,English,2010_2020,Pop,Energetic,Medium,Male,Solo,Mainstream
+2,Someone Like You,Adele,English,2010_2020,Pop,Sad,Slow,Female,Solo,Mainstream
+3,Blinding Lights,The Weeknd,English,After_2020,Pop,Energetic,Fast,Male,Solo,Mainstream
+4,Tum Hi Ho,Arijit Singh,Hindi,2010_2020,Bollywood,Sad,Slow,Male,Solo,Mainstream
+5,Closer,The Chainsmokers,English,2010_2020,EDM,Energetic,Fast,Mixed,Band,Mainstream
