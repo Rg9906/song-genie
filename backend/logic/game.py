@@ -1,7 +1,8 @@
 from logic.engine import load_songs
 from logic.belief import initialize_beliefs, update_beliefs
 from logic.features import FEATURE_VALUES
-from logic.questions import generate_questions
+from logic.questions import generate_questions, select_best_question
+
 
 class Game:
     def __init__(self):
@@ -12,13 +13,20 @@ class Game:
         self.current_question = None
 
     def next_question(self):
-        for q in self.questions:
-            key = (q["feature"], q["value"])
-            if key not in self.asked:
-                self.asked.add(key)
-                self.current_question = q
-                return q
-        return None
+        best = select_best_question(
+            self.questions,
+            self.songs,
+            self.beliefs,
+            self.asked
+        )
+
+        if best is None:
+            return None
+
+        key = (best["feature"], best["value"])
+        self.asked.add(key)
+        self.current_question = best
+        return best
 
     def answer(self, user_answer):
         if self.current_question is None:
