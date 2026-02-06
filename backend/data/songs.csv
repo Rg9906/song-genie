@@ -1,6 +1,7 @@
-id,title,artist,language,era,genre,mood,tempo,vocal_type,artist_type,popularity
-1,Shape of You,Ed Sheeran,English,2010_2020,Pop,Energetic,Medium,Male,Solo,Mainstream
-2,Someone Like You,Adele,English,2010_2020,Pop,Sad,Slow,Female,Solo,Mainstream
-3,Blinding Lights,The Weeknd,English,After_2020,Pop,Energetic,Fast,Male,Solo,Mainstream
-4,Tum Hi Ho,Arijit Singh,Hindi,2010_2020,Bollywood,Sad,Slow,Male,Solo,Mainstream
-5,Closer,The Chainsmokers,English,2010_2020,EDM,Energetic,Fast,Mixed,Band,Mainstream
+id,title,artist,language,language_conf,era,era_conf,genre,genre_conf,mood,mood_conf,tempo,tempo_conf,vocal_type,vocal_type_conf,artist_type,artist_type_conf,popularity,popularity_conf
+1,Shape of You,Ed Sheeran,English,1.0,2010_2020,1.0,Pop,1.0,Energetic,1.0,Medium,1.0,Male,1.0,Solo,1.0,Mainstream,1.0
+2,Someone Like You,Adele,English,1.0,2010_2020,1.0,Pop,1.0,Sad,1.0,Slow,1.0,Female,1.0,Solo,1.0,Mainstream,1.0
+3,Blinding Lights,The Weeknd,English,1.0,After_2020,1.0,Pop,1.0,Energetic,1.0,Fast,1.0,Male,1.0,Solo,1.0,Mainstream,1.0
+4,Tum Hi Ho,Arijit Singh,Hindi,1.0,2010_2020,1.0,Bollywood,1.0,Sad,1.0,Slow,1.0,Male,1.0,Solo,1.0,Mainstream,1.0
+5,Closer,The Chainsmokers,English,1.0,2010_2020,1.0,EDM,1.0,Energetic,1.0,Fast,1.0,Mixed,1.0,Band,1.0,Mainstream,1.0
+

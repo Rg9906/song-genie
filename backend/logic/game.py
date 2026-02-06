@@ -17,6 +17,28 @@ class Game:
         self.current_question = None
         self.question_count = 0
 
+        # store implicit answer history
+        self.answer_history = {}  # feature -> {value -> yes/no/unsure}
+
+    def record_answer(self, feature, value, answer):
+        if feature not in self.answer_history:
+            self.answer_history[feature] = {}
+        self.answer_history[feature][value] = answer
+
+    def infer_features(self):
+        inferred = {}
+
+        for feature, values in FEATURE_VALUES.items():
+            answers = self.answer_history.get(feature, {})
+            yes_values = [v for v, a in answers.items() if a == "yes"]
+
+            if len(yes_values) == 1:
+                inferred[feature] = yes_values[0]
+            else:
+                inferred[feature] = "Other"
+
+        return inferred
+
     def get_top_guess(self):
         best_song_id = None
         best_prob = -1.0
@@ -40,31 +62,27 @@ class Game:
         )
 
         top = []
-        count = 0
-
-        for song_id, prob in sorted_items:
-            if count >= k:
-                break
-            top.append({
-                "song_id": song_id,
-                "prob": prob
-            })
-            count += 1
+        for song_id, prob in sorted_items[:k]:
+            top.append({"song_id": song_id, "prob": prob})
 
         return top
 
     def next_question(self):
-        # If we've asked too many questions and still aren't confident, trigger learning
+        # 🔥 LEARNING TRIGGER
         if self.question_count >= MAX_QUESTIONS:
             return {
                 "type": "learn",
-                "message": "I couldn't identify the song confidently. Please help me learn it."
+                "message": "I couldn't guess your song. What song were you thinking of?",
+                "ask": {
+                    "title": True,
+                    "artist": True
+                },
+                "inferred_features": self.infer_features()
             }
 
-        # Check if we should guess instead of asking
+        # 🔥 GUESSING
         if self.should_guess():
             song_id, confidence = self.get_top_guess()
-
             return {
                 "type": "guess",
                 "song_id": song_id,
@@ -72,6 +90,7 @@ class Game:
                 "top_candidates": self.get_top_candidates()
             }
 
+        # 🔥 ASK NEXT QUESTION
         best = select_best_question(
             self.questions,
             self.songs,
@@ -99,6 +118,8 @@ class Game:
         feature = self.current_question["feature"]
         value = self.current_question["value"]
 
+        self.record_answer(feature, value, user_answer)
+
         self.beliefs = update_beliefs(
             self.beliefs,
             self.songs,
@@ -107,5 +128,4 @@ class Game:
             user_answer
         )
 
-        # After updating beliefs, decide again
         return self.next_question()
