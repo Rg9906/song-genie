@@ -4,4 +4,73 @@ id,title,artist,language,language_conf,era,era_conf,genre,genre_conf,mood,mood_c
 3,Blinding Lights,The Weeknd,English,1.0,After_2020,1.0,Pop,1.0,Energetic,1.0,Fast,1.0,Male,1.0,Solo,1.0,Mainstream,1.0
 4,Tum Hi Ho,Arijit Singh,Hindi,1.0,2010_2020,1.0,Bollywood,1.0,Sad,1.0,Slow,1.0,Male,1.0,Solo,1.0,Mainstream,1.0
 5,Closer,The Chainsmokers,English,1.0,2010_2020,1.0,EDM,1.0,Energetic,1.0,Fast,1.0,Mixed,1.0,Band,1.0,Mainstream,1.0
+6,Starboy,The Weeknd,English,0.9,2010_2020,0.9,Pop,0.9,Energetic,0.9,Medium,0.9,Male,0.9,Solo,0.9,Mainstream,0.9
+7,Save Your Tears,The Weeknd,English,0.9,After_2020,0.9,Pop,0.9,Sad,0.9,Medium,0.9,Male,0.9,Solo,0.9,Mainstream,0.9
+8,The Hills,The Weeknd,English,0.9,2010_2020,0.9,Pop,0.9,Sad,0.9,Medium,0.9,Male,0.9,Solo,0.9,Mainstream,0.9
+
+9,Sweater Weather,The Neighbourhood,English,0.9,2010_2020,0.9,Rock,0.9,Calm,0.9,Medium,0.9,Male,0.9,Band,0.9,Mainstream,0.9
+10,Daddy Issues,The Neighbourhood,English,0.9,2010_2020,0.9,Rock,0.9,Sad,0.9,Medium,0.9,Male,0.9,Band,0.9,Mainstream,0.9
+
+11,Sex Drugs Etc,Beach Weather,English,0.9,2010_2020,0.9,Rock,0.9,Calm,0.9,Medium,0.9,Male,0.9,Band,0.9,Mainstream,0.9
+
+12,What Makes You Beautiful,One Direction,English,0.9,2010_2020,0.9,Pop,0.9,Happy,0.9,Fast,0.9,Male,0.9,Band,0.9,Mainstream,0.9
+13,Night Changes,One Direction,English,0.9,2010_2020,0.9,Pop,0.9,Sad,0.9,Slow,0.9,Male,0.9,Band,0.9,Mainstream,0.9
+14,Story of My Life,One Direction,English,0.9,2010_2020,0.9,Pop,0.9,Sad,0.9,Medium,0.9,Male,0.9,Band,0.9,Mainstream,0.9
+15,Drag Me Down,One Direction,English,0.9,2010_2020,0.9,Pop,0.9,Energetic,0.9,Fast,0.9,Male,0.9,Band,0.9,Mainstream,0.9
+
+16,Do I Wanna Know,Arctic Monkeys,English,0.9,2010_2020,0.9,Rock,0.9,Calm,0.9,Slow,0.9,Male,0.9,Band,0.9,Mainstream,0.9
+17,505,Arctic Monkeys,English,0.9,2000_2010,0.9,Rock,0.9,Sad,0.9,Slow,0.9,Male,0.9,Band,0.9,Mainstream,0.9
+
+18,Let Me Down Slowly,Alec Benjamin,English,0.9,2010_2020,0.9,Pop,0.9,Sad,0.9,Slow,0.9,Male,0.9,Solo,0.9,Mainstream,0.9
+19,Water Fountain,Alec Benjamin,English,0.9,2010_2020,0.9,Pop,0.9,Calm,0.9,Medium,0.9,Male,0.9,Solo,0.9,Mainstream,0.9
+
+20,Cake by the Ocean,DNCE,English,0.9,2010_2020,0.9,Pop,0.9,Energetic,0.9,Fast,0.9,Mixed,0.9,Band,0.9,Mainstream,0.9
+
+21,Youngblood,5 Seconds of Summer,English,0.9,2010_2020,0.9,Pop,0.9,Energetic,0.9,Fast,0.9,Male,0.9,Band,0.9,Mainstream,0.9
+22,Teeth,5 Seconds of Summer,English,0.9,After_2020,0.9,Rock,0.9,Energetic,0.9,Fast,0.9,Male,0.9,Band,0.9,Mainstream,0.9
+
+23,Believer,Imagine Dragons,English,0.9,2010_2020,0.9,Rock,0.9,Energetic,0.9,Fast,0.9,Male,0.9,Band,0.9,Mainstream,0.9
+24,Demons,Imagine Dragons,English,0.9,2010_2020,0.9,Rock,0.9,Sad,0.9,Slow,0.9,Male,0.9,Band,0.9,Mainstream,0.9
+
+25,The Less I Know the Better,Tame Impala,English,0.9,2010_2020,0.9,Rock,0.9,Calm,0.9,Medium,0.9,Male,0.9,Solo,0.9,Mainstream,0.9
+
+26,Levitating,Dua Lipa,English,0.9,After_2020,0.9,Pop,0.9,Happy,0.9,Fast,0.9,Female,0.9,Solo,0.9,Mainstream,0.9
+27,New Rules,Dua Lipa,English,0.9,2010_2020,0.9,Pop,0.9,Energetic,0.9,Medium,0.9,Female,0.9,Solo,0.9,Mainstream,0.9
+
+28,Love Story,Taylor Swift,English,0.9,2000_2010,0.9,Pop,0.9,Happy,0.9,Medium,0.9,Female,0.9,Solo,0.9,Mainstream,0.9
+29,Blank Space,Taylor Swift,English,0.9,2010_2020,0.9,Pop,0.9,Energetic,0.9,Medium,0.9,Female,0.9,Solo,0.9,Mainstream,0.9
+
+30,Mad at Disney,Salem Ilese,English,0.9,After_2020,0.9,Pop,0.9,Sad,0.9,Medium,0.9,Female,0.9,Solo,0.9,Mainstream,0.9
+31,thank u next,Ariana Grande,English,0.9,After_2020,0.9,Pop,0.9,Energetic,0.9,Medium,0.9,Female,0.9,Solo,0.9,Mainstream,0.9
+32,7 rings,Ariana Grande,English,0.9,After_2020,0.9,Pop,0.9,Energetic,0.9,Fast,0.9,Female,0.9,Solo,0.9,Mainstream,0.9
+33,God Is a Woman,Ariana Grande,English,0.9,2010_2020,0.9,Pop,0.9,Calm,0.9,Medium,0.9,Female,0.9,Solo,0.9,Mainstream,0.9
+
+34,Stitches,Shawn Mendes,English,0.9,2010_2020,0.9,Pop,0.9,Sad,0.9,Medium,0.9,Male,0.9,Solo,0.9,Mainstream,0.9
+35,Treat You Better,Shawn Mendes,English,0.9,2010_2020,0.9,Pop,0.9,Energetic,0.9,Medium,0.9,Male,0.9,Solo,0.9,Mainstream,0.9
+
+36,Sorry,Justin Bieber,English,0.9,2010_2020,0.9,Pop,0.9,Energetic,0.9,Fast,0.9,Male,0.9,Solo,0.9,Mainstream,0.9
+37,Love Yourself,Justin Bieber,English,0.9,2010_2020,0.9,Pop,0.9,Sad,0.9,Slow,0.9,Male,0.9,Solo,0.9,Mainstream,0.9
+
+38,Attention,Charlie Puth,English,0.9,2010_2020,0.9,Pop,0.9,Energetic,0.9,Medium,0.9,Male,0.9,Solo,0.9,Mainstream,0.9
+39,We Don’t Talk Anymore,Charlie Puth,English,0.9,2010_2020,0.9,Pop,0.9,Sad,0.9,Medium,0.9,Mixed,0.9,Solo,0.9,Mainstream,0.9
+
+40,Radioactive,Imagine Dragons,English,0.9,2010_2020,0.9,Rock,0.9,Energetic,0.9,Fast,0.9,Male,0.9,Band,0.9,Mainstream,0.9
+41,Thunder,Imagine Dragons,English,0.9,2010_2020,0.9,Rock,0.9,Energetic,0.9,Medium,0.9,Male,0.9,Band,0.9,Mainstream,0.9
+
+42,Let It Happen,Tame Impala,English,0.9,2010_2020,0.9,Rock,0.9,Calm,0.9,Medium,0.9,Male,0.9,Solo,0.9,Mainstream,0.9
+
+43,Perfect,One Direction,English,0.9,2010_2020,0.9,Pop,0.9,Energetic,0.9,Medium,0.9,Male,0.9,Band,0.9,Mainstream,0.9
+44,Live While We’re Young,One Direction,English,0.9,2010_2020,0.9,Pop,0.9,Happy,0.9,Fast,0.9,Male,0.9,Band,0.9,Mainstream,0.9
+
+45,Toothbrush,DNCE,English,0.9,2010_2020,0.9,Pop,0.9,Calm,0.9,Medium,0.9,Mixed,0.9,Band,0.9,Mainstream,0.9
+
+46,If We Have Each Other,Alec Benjamin,English,0.9,2010_2020,0.9,Pop,0.9,Calm,0.9,Slow,0.9,Male,0.9,Solo,0.9,Mainstream,0.9
+
+47,Softcore,The Neighbourhood,English,0.9,2010_2020,0.9,Rock,0.9,Calm,0.9,Medium,0.9,Male,0.9,Band,0.9,Mainstream,0.9
+
+48,R U Mine,Arctic Monkeys,English,0.9,2010_2020,0.9,Rock,0.9,Energetic,0.9,Fast,0.9,Male,0.9,Band,0.9,Mainstream,0.9
+
+49,Don’t Start Now,Dua Lipa,English,0.9,After_2020,0.9,Pop,0.9,Energetic,0.9,Fast,0.9,Female,0.9,Solo,0.9,Mainstream,0.9
+
+50,She Looks So Perfect,5 Seconds of Summer,English,0.9,2010_2020,0.9,Pop,0.9,Happy,0.9,Fast,0.9,Male,0.9,Band,0.9,Mainstream,0.9
 

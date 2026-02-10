@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Song Genie</title>
+</head>
+<body>
+
+<h2 id="question">Loading...</h2>
+
+<button onclick="sendAnswer('yes')">Yes</button>
+<button onclick="sendAnswer('no')">No</button>
+<button onclick="sendAnswer('unsure')">Unsure</button>
+
+<pre id="output"></pre>
+
+<script>
+let session_id = null;
+let currentType = null;
+
+async function startGame() {
+    const res = await fetch("/start");
+    const data = await res.json();
+    session_id = data.session_id;
+    handleResponse(data.data);
+}
+
+async function sendAnswer(answer) {
+    const res = await fetch("/answer", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+            session_id: session_id,
+            answer: answer
+        })
+    });
+
+    const data = await res.json();
+    handleResponse(data);
+}
+
+function handleResponse(data) {
+    currentType = data.type;
+
+    if (data.type === "question") {
+        document.getElementById("question").innerText =
+            data.question.text;
+    }
+
+    else if (data.type === "guess") {
+        document.getElementById("question").innerText =
+            `🎯 I guess: Song ID ${data.song_id} (confidence ${data.confidence.toFixed(2)})`;
+        document.getElementById("output").innerText =
+            JSON.stringify(data.top_candidates, null, 2);
+    }
+
+    else if (data.type === "learn") {
+        document.getElementById("question").innerText =
+            "🤔 I couldn’t guess your song.";
+        document.getElementById("output").innerText =
+            JSON.stringify(data.inferred_features, null, 2);
+    }
+}
+
+startGame();
+</script>
+
+</body>
+</html>

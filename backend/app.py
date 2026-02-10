@@ -1,30 +1,58 @@
 from flask import Flask, jsonify, request
 from logic.game import Game
 import csv
+import uuid
 
 app = Flask(__name__)
-game = Game()
 
 SONGS_PATH = "backend/data/songs.csv"
+
+# 🔥 store active games per session
+games = {}
+
+
+def get_game(session_id):
+    return games.get(session_id)
 
 
 @app.route("/start")
 def start():
-    return jsonify(game.next_question())
+    # 🔥 create new session
+    session_id = str(uuid.uuid4())
+    games[session_id] = Game()
+
+    game = games[session_id]
+    first_step = game.next_question()
+
+    return jsonify({
+        "session_id": session_id,
+        "data": first_step
+    })
 
 
 @app.route("/answer", methods=["POST"])
 def answer():
     data = request.json
+    session_id = data.get("session_id")
     user_answer = data.get("answer")
+
+    if not session_id or session_id not in games:
+        return jsonify({"error": "invalid session"}), 400
+
+    game = games[session_id]
     return jsonify(game.answer(user_answer))
 
 
 @app.route("/learn", methods=["POST"])
 def learn():
-    global game
-
     data = request.json
+    session_id = data.get("session_id")
+
+    if not session_id or session_id not in games:
+        return jsonify({"error": "invalid session"}), 400
+
+    game = games[session_id]
+
     title = data.get("title")
     artist = data.get("artist", "Unknown")
 
@@ -56,8 +84,8 @@ def learn():
             inferred["popularity"], 0.6
         ])
 
-    # reset game so new song is used
-    game = Game()
+    # 🔥 reset only THIS session
+    games[session_id] = Game()
 
     return jsonify({
         "status": "learned",
@@ -65,6 +93,12 @@ def learn():
         "title": title,
         "artist": artist
     })
+
+from flask import send_from_directory
+
+@app.route("/")
+def index():
+    return send_from_directory("../frontend", "index.html")
 
 
 if __name__ == "__main__":

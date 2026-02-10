@@ -23,15 +23,26 @@ def update_beliefs(beliefs, songs, feature, value, answer):
         matches = (song[feature] == value)
         confidence = song.get(conf_key, 1.0)
 
-        base = 1.0
+        # MUCH stronger evidence handling
         if answer == "yes":
-            base = 1.2 if matches else 0.8
+            if matches:
+                multiplier = 1.8 * confidence
+            else:
+                multiplier = 0.3
         elif answer == "no":
-            base = 0.8 if matches else 1.2
-
-        # 🔥 KEY LINE: confidence-weighted update
-        multiplier = 1 + (base - 1) * confidence
+            if matches:
+                multiplier = 0.25
+            else:
+                multiplier = 1.1
+        else:  # unsure
+            multiplier = 1.0
 
         beliefs[song_id] *= multiplier
 
-    return normalize(beliefs)
+    # normalize
+    total = sum(beliefs.values())
+    if total > 0:
+        for k in beliefs:
+            beliefs[k] /= total
+
+    return beliefs
