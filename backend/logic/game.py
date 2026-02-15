@@ -38,27 +38,6 @@ class Game:
 
         return inferred
 
-    # 🔥 SYMBOLIC CERTAINTY
-    def get_logical_match(self):
-        inferred = self.infer_features()
-        candidates = []
-
-        for song in self.songs:
-            ok = True
-            for feature, value in inferred.items():
-                if value == "Other":
-                    continue
-                if song[feature] != value:
-                    ok = False
-                    break
-            if ok:
-                candidates.append(song)
-
-        if len(candidates) == 1:
-            return candidates[0]["id"]
-
-        return None
-
     def get_top_guess(self):
         best_song_id = None
         best_prob = -1.0
@@ -94,32 +73,19 @@ class Game:
         ]
 
     def next_question(self):
-        # 🔥 1. HARD LOGICAL GUESS (HIGHEST PRIORITY)
-        logical_id = self.get_logical_match()
-        if logical_id is not None:
-            return {
-                "type": "guess",
-                "song_id": logical_id,
-                "confidence": 0.99,
-                "top_candidates": self.get_top_candidates()
-            }
 
-        # 🔥 2. PROBABILISTIC GUESS
+        # 1️⃣ PROBABILISTIC GUESS
         if self.should_guess():
             song_id, confidence = self.get_top_guess()
-            top_candidates = self.get_top_candidates()
-
-            total = sum(c["prob"] for c in top_candidates)
-            relative_confidence = confidence / total if total > 0 else confidence
 
             return {
                 "type": "guess",
                 "song_id": song_id,
-                "confidence": round(relative_confidence, 2),
-                "top_candidates": top_candidates
+                "confidence": round(confidence, 3),
+                "top_candidates": self.get_top_candidates()
             }
 
-        # 🔥 3. LEARNING MODE
+        # 2️⃣ LEARNING MODE
         if self.question_count >= MAX_QUESTIONS:
             return {
                 "type": "learn",
@@ -131,7 +97,7 @@ class Game:
                 "inferred_features": self.infer_features()
             }
 
-        # 🔥 4. ASK NEXT QUESTION
+        # 3️⃣ ASK NEXT QUESTION
         best = select_best_question(
             self.questions,
             self.songs,
@@ -144,7 +110,7 @@ class Game:
             return {
                 "type": "guess",
                 "song_id": song_id,
-                "confidence": round(confidence, 2),
+                "confidence": round(confidence, 3),
                 "top_candidates": self.get_top_candidates()
             }
 

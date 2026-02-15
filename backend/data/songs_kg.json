@@ -1,0 +1,641 @@
+[
+  {
+    "id": 0,
+    "title": "LoveGame",
+    "artists": [
+      "Lady Gaga"
+    ],
+    "genres": [
+      "electropop",
+      "dance-pop"
+    ],
+    "publication_date": "2009-03-24T00:00:00Z",
+    "language": "English",
+    "country": "United States"
+  },
+  {
+    "id": 1,
+    "title": "Party Rock Anthem",
+    "artists": [
+      "Lauren Bennett",
+      "LMFAO",
+      "GoonRock"
+    ],
+    "genres": [
+      "electro house",
+      "electro",
+      "hip-hop",
+      "dance-pop"
+    ],
+    "publication_date": "2010-12-16T00:00:00Z",
+    "language": "English",
+    "country": "United States"
+  },
+  {
+    "id": 2,
+    "title": "Nothing Compares 2 U",
+    "artists": [
+      "Sin\u00e9ad O'Connor"
+    ],
+    "genres": [
+      "pop music"
+    ],
+    "publication_date": "1990-01-08T00:00:00Z",
+    "language": "English",
+    "country": null
+  },
+  {
+    "id": 3,
+    "title": "Sexy Bitch",
+    "artists": [
+      "Akon",
+      "David Guetta"
+    ],
+    "genres": [
+      "hip house"
+    ],
+    "publication_date": "2009-07-26T00:00:00Z",
+    "language": "English",
+    "country": "France"
+  },
+  {
+    "id": 4,
+    "title": "Wonderful Tonight",
+    "artists": [
+      "Eric Clapton"
+    ],
+    "genres": [
+      "rock music"
+    ],
+    "publication_date": "1977-01-01T00:00:00Z",
+    "language": "English",
+    "country": null
+  },
+  {
+    "id": 5,
+    "title": "Te Amo",
+    "artists": [
+      "Rihanna"
+    ],
+    "genres": [
+      "music of Latin America"
+    ],
+    "publication_date": "2010-06-11T00:00:00Z",
+    "language": "English",
+    "country": null
+  },
+  {
+    "id": 6,
+    "title": "Always Be My Baby",
+    "artists": [
+      "Mariah Carey"
+    ],
+    "genres": [
+      "pop music",
+      "contemporary R&B"
+    ],
+    "publication_date": "1996-03-09T00:00:00Z",
+    "language": "English",
+    "country": "United States"
+  },
+  {
+    "id": 7,
+    "title": "Born to Die",
+    "artists": [
+      "Lana Del Rey"
+    ],
+    "genres": [
+      "indie pop",
+      "pop music",
+      "trip hop"
+    ],
+    "publication_date": "2011-12-22T00:00:00Z",
+    "language": "English",
+    "country": null
+  },
+  {
+    "id": 8,
+    "title": "Space Oddity",
+    "artists": [
+      "David Bowie"
+    ],
+    "genres": [
+      "folk rock",
+      "space rock"
+    ],
+    "publication_date": "1969-07-11T00:00:00Z",
+    "language": "English",
+    "country": "United Kingdom"
+  },
+  {
+    "id": 9,
+    "title": "Express Yourself",
+    "artists": [
+      "Madonna"
+    ],
+    "genres": [
+      "pop music"
+    ],
+    "publication_date": "1989-05-09T00:00:00Z",
+    "language": "English",
+    "country": "United States"
+  },
+  {
+    "id": 10,
+    "title": "Man Down",
+    "artists": [
+      "Rihanna"
+    ],
+    "genres": [
+      "reggae"
+    ],
+    "publication_date": "2011-05-03T00:00:00Z",
+    "language": "English",
+    "country": null
+  },
+  {
+    "id": 11,
+    "title": "Open Your Heart",
+    "artists": [
+      "Madonna"
+    ],
+    "genres": [
+      "dance-pop"
+    ],
+    "publication_date": "1986-11-19T00:00:00Z",
+    "language": "English",
+    "country": "United States"
+  },
+  {
+    "id": 12,
+    "title": "Who's That Chick?",
+    "artists": [
+      "Rihanna",
+      "David Guetta"
+    ],
+    "genres": [
+      "dance-pop"
+    ],
+    "publication_date": "2010-11-22T00:00:00Z",
+    "language": "English",
+    "country": "France"
+  },
+  {
+    "id": 13,
+    "title": "Thinking of You",
+    "artists": [
+      "Katy Perry"
+    ],
+    "genres": [
+      "pop music"
+    ],
+    "publication_date": "2009-01-12T00:00:00Z",
+    "language": "English",
+    "country": "United States"
+  },
+  {
+    "id": 14,
+    "title": "Innuendo",
+    "artists": [
+      "Queen"
+    ],
+    "genres": [
+      "progressive metal",
+      "new flamenco",
+      "progressive rock"
+    ],
+    "publication_date": "1991-01-14T00:00:00Z",
+    "language": "English",
+    "country": null
+  },
+  {
+    "id": 15,
+    "title": "Spinning Around",
+    "artists": [
+      "Kylie Minogue"
+    ],
+    "genres": [
+      "disco",
+      "house music"
+    ],
+    "publication_date": "2000-06-19T00:00:00Z",
+    "language": "English",
+    "country": null
+  },
+  {
+    "id": 16,
+    "title": "Be My Baby",
+    "artists": [
+      "The Ronettes"
+    ],
+    "genres": [
+      "country music"
+    ],
+    "publication_date": "1963-01-01T00:00:00Z",
+    "language": "English",
+    "country": "United States"
+  },
+  {
+    "id": 17,
+    "title": "Before I Forget",
+    "artists": [
+      "Slipknot"
+    ],
+    "genres": [
+      "nu metal"
+    ],
+    "publication_date": "2005-06-13T00:00:00Z",
+    "language": "English",
+    "country": "United States"
+  },
+  {
+    "id": 18,
+    "title": "Clocks",
+    "artists": [
+      "Coldplay"
+    ],
+    "genres": [
+      "pop rock",
+      "arena rock",
+      "alternative rock",
+      "psychedelic rock"
+    ],
+    "publication_date": "2002-12-10T00:00:00Z",
+    "language": "English",
+    "country": null
+  },
+  {
+    "id": 19,
+    "title": "Headlong",
+    "artists": [
+      "Queen"
+    ],
+    "genres": [
+      "hard rock"
+    ],
+    "publication_date": "1991-01-14T00:00:00Z",
+    "language": "English",
+    "country": null
+  },
+  {
+    "id": 20,
+    "title": "Eyes Open",
+    "artists": [
+      "Taylor Swift"
+    ],
+    "genres": [
+      "rock music"
+    ],
+    "publication_date": "2012-03-27T00:00:00Z",
+    "language": "English",
+    "country": "United States"
+  },
+  {
+    "id": 21,
+    "title": "Miles Away",
+    "artists": [
+      "Madonna"
+    ],
+    "genres": [
+      "electropop"
+    ],
+    "publication_date": "2008-11-01T00:00:00Z",
+    "language": "English",
+    "country": "United States"
+  },
+  {
+    "id": 22,
+    "title": "Slow",
+    "artists": [
+      "Kylie Minogue"
+    ],
+    "genres": [
+      "synth-pop",
+      "electropop"
+    ],
+    "publication_date": "2003-11-03T00:00:00Z",
+    "language": "English",
+    "country": null
+  },
+  {
+    "id": 23,
+    "title": "It's So Easy",
+    "artists": [
+      "Guns N' Roses"
+    ],
+    "genres": [
+      "heavy metal"
+    ],
+    "publication_date": "1987-06-15T00:00:00Z",
+    "language": "English",
+    "country": "United States"
+  },
+  {
+    "id": 24,
+    "title": "Jerusalem of Gold",
+    "artists": [
+      "Nizza Thobi",
+      "Shuli Natan",
+      "Ofra Haza",
+      "Naomi Shemer"
+    ],
+    "genres": [
+      "music of Israel",
+      "Israeli song",
+      "folk music"
+    ],
+    "publication_date": "1967-05-15T00:00:00Z",
+    "language": "Modern Hebrew",
+    "country": "Israel"
+  },
+  {
+    "id": 25,
+    "title": "Say It Right",
+    "artists": [
+      "Nelly Furtado"
+    ],
+    "genres": [
+      "pop music",
+      "contemporary R&B"
+    ],
+    "publication_date": "2006-10-31T00:00:00Z",
+    "language": "English",
+    "country": null
+  },
+  {
+    "id": 26,
+    "title": "Where Them Girls At",
+    "artists": [
+      "Nicki Minaj",
+      "Flo Rida",
+      "David Guetta"
+    ],
+    "genres": [
+      "hip-hop"
+    ],
+    "publication_date": "2011-05-01T00:00:00Z",
+    "language": "English",
+    "country": "France"
+  },
+  {
+    "id": 27,
+    "title": "The One That Got Away",
+    "artists": [
+      "B.o.B",
+      "Katy Perry"
+    ],
+    "genres": [
+      "pop music"
+    ],
+    "publication_date": "2011-10-04T00:00:00Z",
+    "language": "English",
+    "country": "United States"
+  },
+  {
+    "id": 28,
+    "title": "Suicide Is Painless",
+    "artists": [
+      "Manic Street Preachers",
+      "Henry Mancini",
+      "Johnny Mandel",
+      "Ahmad Jamal"
+    ],
+    "genres": [
+      "traditional folk music"
+    ],
+    "publication_date": "1970-01-01T00:00:00Z",
+    "language": "English",
+    "country": null
+  },
+  {
+    "id": 29,
+    "title": "All Good Things (Come to an End)",
+    "artists": [
+      "Nelly Furtado"
+    ],
+    "genres": [
+      "pop music"
+    ],
+    "publication_date": "2006-11-27T00:00:00Z",
+    "language": "English",
+    "country": null
+  },
+  {
+    "id": 30,
+    "title": "Breakaway",
+    "artists": [
+      "Kelly Clarkson"
+    ],
+    "genres": [
+      "folk-pop"
+    ],
+    "publication_date": "2004-07-01T00:00:00Z",
+    "language": "English",
+    "country": "United States"
+  },
+  {
+    "id": 31,
+    "title": "Lambada",
+    "artists": [
+      "Kaoma"
+    ],
+    "genres": [
+      "lambada"
+    ],
+    "publication_date": "1989-07-01T00:00:00Z",
+    "language": "Portuguese",
+    "country": null
+  },
+  {
+    "id": 32,
+    "title": "Dance in the Dark",
+    "artists": [
+      "Lady Gaga"
+    ],
+    "genres": [
+      "synth-pop"
+    ],
+    "publication_date": "2010-07-26T00:00:00Z",
+    "language": "English",
+    "country": "United States"
+  },
+  {
+    "id": 33,
+    "title": "Touch My Body",
+    "artists": [
+      "Mariah Carey"
+    ],
+    "genres": [
+      "pop music",
+      "contemporary R&B"
+    ],
+    "publication_date": "2008-02-19T00:00:00Z",
+    "language": "English",
+    "country": "United States"
+  },
+  {
+    "id": 34,
+    "title": "Who Wants to Live Forever",
+    "artists": [
+      "Queen"
+    ],
+    "genres": [
+      "rock music"
+    ],
+    "publication_date": "1986-09-15T00:00:00Z",
+    "language": "English",
+    "country": null
+  },
+  {
+    "id": 35,
+    "title": "Club Can't Handle Me",
+    "artists": [
+      "Flo Rida",
+      "David Guetta"
+    ],
+    "genres": [
+      "hip house"
+    ],
+    "publication_date": "2010-06-28T00:00:00Z",
+    "language": "English",
+    "country": "France"
+  },
+  {
+    "id": 36,
+    "title": "3",
+    "artists": [
+      "Britney Spears"
+    ],
+    "genres": [
+      "synth-pop"
+    ],
+    "publication_date": "2009-09-29T00:00:00Z",
+    "language": "English",
+    "country": "United States"
+  },
+  {
+    "id": 37,
+    "title": "Someday",
+    "artists": [
+      "Mariah Carey"
+    ],
+    "genres": [
+      "J-pop"
+    ],
+    "publication_date": "1990-11-15T00:00:00Z",
+    "language": "English",
+    "country": "United States"
+  },
+  {
+    "id": 38,
+    "title": "You da One",
+    "artists": [
+      "Rihanna"
+    ],
+    "genres": [
+      "reggae",
+      "pop music"
+    ],
+    "publication_date": "2011-11-11T00:00:00Z",
+    "language": "English",
+    "country": "United States"
+  },
+  {
+    "id": 39,
+    "title": "Red",
+    "artists": [
+      "Taylor Swift"
+    ],
+    "genres": [
+      "country pop",
+      "soft rock",
+      "country music"
+    ],
+    "publication_date": "2012-10-02T00:00:00Z",
+    "language": "English",
+    "country": "United States"
+  },
+  {
+    "id": 40,
+    "title": "I Shot the Sheriff",
+    "artists": [
+      "Bob Marley & The Wailers"
+    ],
+    "genres": [
+      "protest song"
+    ],
+    "publication_date": "1973-01-01T00:00:00Z",
+    "language": "English",
+    "country": null
+  },
+  {
+    "id": 41,
+    "title": "Riders on the Storm",
+    "artists": [
+      "The Doors"
+    ],
+    "genres": [
+      "psychedelic rock"
+    ],
+    "publication_date": "1971-06-01T00:00:00Z",
+    "language": "English",
+    "country": "United States"
+  },
+  {
+    "id": 42,
+    "title": "The Show Must Go On",
+    "artists": [
+      "Queen"
+    ],
+    "genres": [
+      "symphonic rock",
+      "hard rock",
+      "art rock",
+      "rock music"
+    ],
+    "publication_date": "1991-10-14T00:00:00Z",
+    "language": "English",
+    "country": null
+  },
+  {
+    "id": 43,
+    "title": "Into the West",
+    "artists": [
+      "Annie Lennox"
+    ],
+    "genres": [
+      "pop music"
+    ],
+    "publication_date": "2003-11-01T00:00:00Z",
+    "language": "English",
+    "country": null
+  },
+  {
+    "id": 44,
+    "title": "In the Air Tonight",
+    "artists": [
+      "Phil Collins"
+    ],
+    "genres": [
+      "rock music"
+    ],
+    "publication_date": "1981-01-09T00:00:00Z",
+    "language": "English",
+    "country": null
+  },
+  {
+    "id": 45,
+    "title": "Party in the U.S.A.",
+    "artists": [
+      "Miley Cyrus"
+    ],
+    "genres": [
+      "pop music",
+      "electronic dance music",
+      "dance-pop"
+    ],
+    "publication_date": "2009-08-11T00:00:00Z",
+    "language": "English",
+    "country": "United States"
+  }
+]
