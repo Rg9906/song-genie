@@ -1,4 +1,5 @@
 from flask import Flask, jsonify, request, send_from_directory
+from flask_cors import CORS
 import uuid
 
 from backend.logic.engine import Engine
@@ -7,7 +8,12 @@ from backend.logic.questions import select_best_question
 from backend.logic.kg_loader import fetch_song_by_title, append_song
 
 
+# Create Flask app
 app = Flask(__name__)
+
+# ENABLE CORS (THIS FIXES "Backend unreachable")
+CORS(app)
+
 
 # Store active sessions
 sessions = {}
@@ -33,8 +39,7 @@ class Session:
 
 
 # Start new game
-@app.route("/start")
-
+@app.route("/start", methods=["GET"])
 def start():
 
     session_id = str(uuid.uuid4())
@@ -67,7 +72,6 @@ def start():
 
 # Submit answer
 @app.route("/answer", methods=["POST"])
-
 def answer():
 
     data = request.json
@@ -108,7 +112,7 @@ def answer():
 
 
     # Confidence condition met → return result
-    if p1 >= CONFIDENCE_THRESHOLD or (p2 > 0 and p1/p2 >= DOMINANCE_RATIO):
+    if p1 >= CONFIDENCE_THRESHOLD or (p2 > 0 and p1 / p2 >= DOMINANCE_RATIO):
 
         for song in session.songs:
 
@@ -138,7 +142,9 @@ def answer():
     if question is None:
 
         return jsonify({
+
             "type": "unknown"
+
         })
 
 
@@ -157,7 +163,6 @@ def answer():
 
 # Learn new song from Wikidata
 @app.route("/learn", methods=["POST"])
-
 def learn():
 
     data = request.json
@@ -191,9 +196,19 @@ def learn():
         })
 
 
-# Serve frontend
-@app.route("/")
+# Health check (VERY useful)
+@app.route("/health", methods=["GET"])
+def health():
 
+    return jsonify({
+
+        "status": "ok"
+
+    })
+
+
+# Serve frontend (optional)
+@app.route("/")
 def index():
 
     return send_from_directory("frontend", "index.html")
@@ -202,4 +217,4 @@ def index():
 # Run server
 if __name__ == "__main__":
 
-    app.run(debug=True)
+    app.run(host="127.0.0.1", port=5000, debug=True)
