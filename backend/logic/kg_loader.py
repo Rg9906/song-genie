@@ -1,6 +1,10 @@
-import requests
 import json
 import os
+from typing import Any, Dict, List, Optional
+
+import requests
+
+from backend.logic.config import REQUEST_TIMEOUT_SECONDS
 
 
 WIKIDATA_SPARQL_URL = "https://query.wikidata.org/sparql"
@@ -40,33 +44,44 @@ def get_data_path(filename="songs_kg.json"):
 # Batch Fetch (existing)
 # -------------------------
 
-def fetch_songs_from_wikidata():
+def fetch_songs_from_wikidata() -> Dict[str, Any]:
 
     headers = {
         "Accept": "application/sparql-results+json"
     }
 
-    response = requests.get(
-        WIKIDATA_SPARQL_URL,
-        params={"query": SPARQL_QUERY},
-        headers=headers
-    )
-
-    response.raise_for_status()
-
-    return response.json()
+    try:
+        response = requests.get(
+            WIKIDATA_SPARQL_URL,
+            params={"query": SPARQL_QUERY},
+            headers=headers,
+            timeout=REQUEST_TIMEOUT_SECONDS,
+        )
+        response.raise_for_status()
+        return response.json()
+    except requests.RequestException as exc:
+        raise RuntimeError("Failed to fetch songs from Wikidata") from exc
 
 
 # -------------------------
 # Single Song Fetch (NEW)
 # -------------------------
 
-def fetch_song_by_title(title):
+def _escape_label(label: str) -> str:
+    """
+    Escape a string for safe use in a SPARQL rdfs:label literal.
+    """
+    return label.replace("\\", "\\\\").replace('"', '\\"')
+
+
+def fetch_song_by_title(title: str) -> Optional[Dict[str, Any]]:
+
+    safe_title = _escape_label(title)
 
     query = f"""
     SELECT ?song ?songLabel ?artistLabel ?genreLabel ?pubDate ?languageLabel ?countryLabel WHERE {{
       ?song wdt:P31 wd:Q7366.
-      ?song rdfs:label "{title}"@en.
+      ?song rdfs:label "{safe_title}"@en.
 
       OPTIONAL {{ ?song wdt:P175 ?artist. }}
       OPTIONAL {{ ?song wdt:P136 ?genre. }}
@@ -82,15 +97,18 @@ def fetch_song_by_title(title):
         "Accept": "application/sparql-results+json"
     }
 
-    response = requests.get(
-        WIKIDATA_SPARQL_URL,
-        params={"query": query},
-        headers=headers
-    )
-
-    response.raise_for_status()
-
-    data = response.json()
+    try:
+        response = requests.get(
+            WIKIDATA_SPARQL_URL,
+            params={"query": query},
+            headers=headers,
+            timeout=REQUEST_TIMEOUT_SECONDS,
+        )
+        response.raise_for_status()
+        data = response.json()
+    except (requests.RequestException, ValueError) as exc:
+        # ValueError can be raised by response.json()
+        raise RuntimeError("Failed to fetch song by title from Wikidata") from exc
 
     songs = normalize_results(data)
 
@@ -104,9 +122,9 @@ def fetch_song_by_title(title):
 # Normalization (existing)
 # -------------------------
 
-def normalize_results(results):
+def normalize_results(results: Dict[str, Any]) -> List[Dict[str, Any]]:
 
-    merged = {}
+    merged: Dict[str, Dict[str, Any]] = {}
 
     for item in results["results"]["bindings"]:
 
@@ -153,7 +171,7 @@ def normalize_results(results):
         if merged[title]["country"] is None and country:
             merged[title]["country"] = country
 
-    songs = []
+    songs: List[Dict[str, Any]] = []
 
     for i, title in enumerate(merged):
 

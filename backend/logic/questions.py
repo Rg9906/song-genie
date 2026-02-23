@@ -1,6 +1,8 @@
 import math
+import random
 
 from backend.logic.belief import compute_likelihood, normalize
+from backend.logic.analytics import compute_question_stats
 
 
 def entropy(probabilities):
@@ -202,6 +204,49 @@ def select_best_question(questions, songs, beliefs, asked):
 
             best_score = score
 
+            best_question = q
+
+    return best_question
+
+
+# Override with a sturdier Thompson Sampling policy (kept here so we don't have
+# to rewrite the file above; Python uses the last definition).
+from backend.logic.analytics import compute_question_stats  # noqa: E402
+from backend.logic.config import BANDIT_LAMBDA  # noqa: E402
+
+
+def select_best_question(questions, songs, beliefs, asked):
+    """
+    Thompson-sampling style selection:
+    - Base score = information gain (entropy drop)
+    - Bandit term = sampled from Beta(successes+1, failures+1) per question
+    - Final score = base_score + BANDIT_LAMBDA * bandit_sample
+    """
+    stats = compute_question_stats()
+
+    best_question = None
+    best_score = -1.0
+
+    for q in questions:
+        key = (q["feature"], q["value"])
+        if key in asked:
+            continue
+
+        base_score = score_question(q, songs, beliefs)
+
+        q_stats = stats.get(key, {})
+        count = float(q_stats.get("count", 0.0))
+        success_count = float(q_stats.get("success_count", 0.0))
+        failures = max(count - success_count, 0.0)
+
+        alpha = success_count + 1.0
+        beta_param = failures + 1.0
+        bandit_sample = random.betavariate(alpha, beta_param)
+
+        score = base_score + (BANDIT_LAMBDA * bandit_sample)
+
+        if score > best_score:
+            best_score = score
             best_question = q
 
     return best_question

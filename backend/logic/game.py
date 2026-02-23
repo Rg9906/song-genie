@@ -1,18 +1,17 @@
-from logic.engine import load_songs
-from logic.belief import initialize_beliefs, update_beliefs
-from logic.features import FEATURE_VALUES
-from logic.questions import generate_questions, select_best_question
-
-
-CONFIDENCE_THRESHOLD = 0.55
-MAX_QUESTIONS = 20
+from backend.logic.engine import Engine
+from backend.logic.belief import update_beliefs
+from backend.logic.questions import select_best_question
+from backend.logic.config import CONFIDENCE_THRESHOLD, MAX_QUESTIONS
 
 
 class Game:
     def __init__(self):
-        self.songs = load_songs("data/songs.csv")
-        self.beliefs = initialize_beliefs(self.songs)
-        self.questions = generate_questions(FEATURE_VALUES)
+        # Initialize Engine (loads songs_kg.json)
+        self.engine = Engine()
+
+        self.entities = self.engine.get_entities()
+        self.beliefs = self.engine.get_beliefs()
+        self.questions = self.engine.get_questions()
 
         self.asked = set()
         self.current_question = None
@@ -20,23 +19,18 @@ class Game:
 
         self.answer_history = {}
 
+    # ---------------------------------------
+    # Answer Tracking
+    # ---------------------------------------
+
     def record_answer(self, feature, value, answer):
         if feature not in self.answer_history:
             self.answer_history[feature] = {}
         self.answer_history[feature][value] = answer
 
-    def infer_features(self):
-        inferred = {}
-        for feature, values in FEATURE_VALUES.items():
-            answers = self.answer_history.get(feature, {})
-            yes_values = [v for v, a in answers.items() if a == "yes"]
-
-            if len(yes_values) == 1:
-                inferred[feature] = yes_values[0]
-            else:
-                inferred[feature] = "Other"
-
-        return inferred
+    # ---------------------------------------
+    # Guessing Logic
+    # ---------------------------------------
 
     def get_top_guess(self):
         best_song_id = None
@@ -68,13 +62,17 @@ class Game:
         )
 
         return [
-            {"song_id": song_id, "prob": prob}
+            {"song_id": song_id, "prob": round(prob, 3)}
             for song_id, prob in sorted_items[:k]
         ]
 
+    # ---------------------------------------
+    # Question Flow
+    # ---------------------------------------
+
     def next_question(self):
 
-        # 1️⃣ PROBABILISTIC GUESS
+        # 1️⃣ If confident → guess
         if self.should_guess():
             song_id, confidence = self.get_top_guess()
 
@@ -85,22 +83,17 @@ class Game:
                 "top_candidates": self.get_top_candidates()
             }
 
-        # 2️⃣ LEARNING MODE
+        # 2️⃣ If max questions reached → learning mode
         if self.question_count >= MAX_QUESTIONS:
             return {
                 "type": "learn",
-                "message": "I couldn't guess your song. What song were you thinking of?",
-                "ask": {
-                    "title": True,
-                    "artist": True
-                },
-                "inferred_features": self.infer_features()
+                "message": "I couldn't guess your song. What song were you thinking of?"
             }
 
-        # 3️⃣ ASK NEXT QUESTION
+        # 3️⃣ Ask best entropy question
         best = select_best_question(
             self.questions,
-            self.songs,
+            self.entities,
             self.beliefs,
             self.asked
         )
@@ -124,7 +117,12 @@ class Game:
             "question": best
         }
 
+    # ---------------------------------------
+    # Answer Handling
+    # ---------------------------------------
+
     def answer(self, user_answer):
+
         if self.current_question is None:
             return None
 
@@ -135,10 +133,26 @@ class Game:
 
         self.beliefs = update_beliefs(
             self.beliefs,
-            self.songs,
+            self.entities,
             feature,
             value,
             user_answer
         )
 
         return self.next_question()
+
+    # ---------------------------------------
+    # Reset Game
+    # ---------------------------------------
+
+    def reset(self):
+        self.engine.reload()
+
+        self.entities = self.engine.get_entities()
+        self.beliefs = self.engine.get_beliefs()
+        self.questions = self.engine.get_questions()
+
+        self.asked = set()
+        self.current_question = None
+        self.question_count = 0
+        self.answer_history = {}
