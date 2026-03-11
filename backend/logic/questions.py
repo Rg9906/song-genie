@@ -357,20 +357,47 @@ from backend.logic.config import BANDIT_LAMBDA  # noqa: E402
 def select_best_question(questions, songs, beliefs, asked):
     """
     Pure information gain selection - no bandit to prevent bias
+    With logical filtering to prevent redundant questions
     """
     best_question = None
     best_score = -1.0
+
+    # Extract answered features for logical filtering
+    answered_features = {}
+    for (feature, value) in asked:
+        if feature not in answered_features:
+            answered_features[feature] = []
+        answered_features[feature].append(value)
 
     for q in questions:
         key = (q["feature"], q["value"])
         if key in asked:
             continue
 
+        # Skip redundant questions based on logical filtering
+        feature = q["feature"]
+        value = q["value"]
+        
+        # Time period filtering
+        if feature in ["era", "decade"] and "era" in answered_features:
+            # If we already got an answer about era, don't ask other eras
+            continue
+        if feature == "year" and ("era" in answered_features or "decade" in answered_features):
+            # If we know era/decade, don't ask specific year
+            continue
+            
+        # Language filtering - if we know the language, don't ask other languages
+        if feature == "language" and "language" in answered_features:
+            continue
+            
+        # Country filtering - if we know the country, don't ask other countries  
+        if feature == "country" and "country" in answered_features:
+            continue
+
         base_score = score_question(q, songs, beliefs)
 
         # Apply heuristic feature preferences and diversity penalty so we
         # don't spam the same kind of question (e.g. artist, country).
-        feature = q.get("feature")
         feature_weight = FEATURE_WEIGHTS.get(feature, 1.0)
         asked_feature_count = sum(1 for (f, _) in asked if f == feature)
         diversity_factor = 1.0 / (1.0 + asked_feature_count)

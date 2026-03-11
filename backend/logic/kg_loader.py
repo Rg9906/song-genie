@@ -23,6 +23,22 @@ SELECT
   ?producerLabel
   ?composerLabel
   ?partOfLabel
+  ?performerLabel
+  ?vocalistLabel
+  ?filmLabel
+  ?tvSeriesLabel
+  ?videoGameLabel
+  ?billionViews
+  ?chartPosition
+  ?recordLabelTypeLabel
+  ?artistGenderLabel
+  ?artistTypeLabel
+  ?songTypeLabel
+  ?duration
+  ?bpm
+  ?instrumentLabel
+  ?themeLabel
+  ?locationLabel
 WHERE {
   ?song wdt:P31 wd:Q7366.
   ?song wdt:P175 ?artist.
@@ -31,15 +47,40 @@ WHERE {
   ?song wdt:P407 ?language.
 
   ?song wikibase:sitelinks ?linkCount.
-  # Slightly relaxed popularity filter + higher LIMIT
   FILTER(?linkCount > 10)
 
+  # Basic optional fields
   OPTIONAL { ?song wdt:P495 ?country. }
-  OPTIONAL { ?song wdt:P166 ?award. }     # award received
-  OPTIONAL { ?song wdt:P264 ?label. }     # record label
-  OPTIONAL { ?song wdt:P162 ?producer. }  # producer
-  OPTIONAL { ?song wdt:P86  ?composer. }  # composer
-  OPTIONAL { ?song wdt:P361 ?partOf. }    # part of (e.g. soundtrack/album)
+  OPTIONAL { ?song wdt:P166 ?award. }
+  OPTIONAL { ?song wdt:P264 ?label. }
+  OPTIONAL { ?song wdt:P162 ?producer. }
+  OPTIONAL { ?song wdt:P86  ?composer. }
+  OPTIONAL { ?song wdt:P361 ?partOf. }
+
+  # Enhanced attributes
+  OPTIONAL { ?song wdt:P175 ?performer. ?performer wdt:P21 ?performerGender. }
+  OPTIONAL { ?song wdt:P175 ?vocalist. }
+  OPTIONAL { ?song wdt:P361 ?film. ?film wdt:P31 wd:Q11424. }  # soundtrack
+  OPTIONAL { ?song wdt:P361 ?tvSeries. ?tvSeries wdt:P31 wd:Q15416. }  # TV series
+  OPTIONAL { ?song wdt:P361 ?videoGame. ?videoGame wdt:P31 wd:Q7889. }  # video game
+  
+  # Chart performance
+  OPTIONAL { ?song wdt:P432 ?billionViews. FILTER(?billionViews >= 1000000000) }
+  OPTIONAL { ?song wdt:P1650 ?chartPosition. }
+  
+  # Artist details
+  OPTIONAL { ?artist wdt:P21 ?artistGender. }
+  OPTIONAL { ?artist wdt:P31 ?artistType. }  # solo artist, duo, group
+  
+  # Song characteristics
+  OPTIONAL { ?song wdt:P31 ?songType. }  # single, album track, etc.
+  OPTIONAL { ?song wdt:P2047 ?duration. }  # duration in seconds
+  OPTIONAL { ?song wdt:P2024 ?bpm. }  # beats per minute
+  OPTIONAL { ?song wdt:P828 ?instrument. }  # instruments used
+  
+  # Thematic and location
+  OPTIONAL { ?song wdt:P921 ?theme. }  # main theme
+  OPTIONAL { ?song wdt:P276 ?location. }  # location of recording/performance
 
   SERVICE wikibase:label { bd:serviceParam wikibase:language "en". }
 }
@@ -157,6 +198,23 @@ def normalize_results(results: Dict[str, Any]) -> List[Dict[str, Any]]:
         producer = item.get("producerLabel", {}).get("value")
         composer = item.get("composerLabel", {}).get("value")
         part_of = item.get("partOfLabel", {}).get("value")
+        
+        # Enhanced attributes
+        performer = item.get("performerLabel", {}).get("value")
+        vocalist = item.get("vocalistLabel", {}).get("value")
+        film = item.get("filmLabel", {}).get("value")
+        tv_series = item.get("tvSeriesLabel", {}).get("value")
+        video_game = item.get("videoGameLabel", {}).get("value")
+        billion_views = item.get("billionViews", {}).get("value")
+        chart_position = item.get("chartPosition", {}).get("value")
+        artist_gender = item.get("artistGenderLabel", {}).get("value")
+        artist_type = item.get("artistTypeLabel", {}).get("value")
+        song_type = item.get("songTypeLabel", {}).get("value")
+        duration = item.get("duration", {}).get("value")
+        bpm = item.get("bpm", {}).get("value")
+        instrument = item.get("instrumentLabel", {}).get("value")
+        theme = item.get("themeLabel", {}).get("value")
+        location = item.get("locationLabel", {}).get("value")
 
         if title is None:
             continue
@@ -188,6 +246,37 @@ def normalize_results(results: Dict[str, Any]) -> List[Dict[str, Any]]:
 
                 "part_of": set(),
 
+                # Enhanced attributes
+                "performers": set(),
+                
+                "vocalists": set(),
+                
+                "films": set(),
+                
+                "tv_series": set(),
+                
+                "video_games": set(),
+                
+                "billion_views": None,
+                
+                "chart_positions": set(),
+                
+                "artist_genders": set(),
+                
+                "artist_types": set(),
+                
+                "song_types": set(),
+                
+                "duration": None,
+                
+                "bpm": None,
+                
+                "instruments": set(),
+                
+                "themes": set(),
+                
+                "locations": set(),
+
             }
 
         if artist:
@@ -210,6 +299,52 @@ def normalize_results(results: Dict[str, Any]) -> List[Dict[str, Any]]:
 
         if part_of:
             merged[title]["part_of"].add(part_of)
+            
+        # Enhanced attributes
+        if performer:
+            merged[title]["performers"].add(performer)
+            
+        if vocalist:
+            merged[title]["vocalists"].add(vocalist)
+            
+        if film:
+            merged[title]["films"].add(film)
+            
+        if tv_series:
+            merged[title]["tv_series"].add(tv_series)
+            
+        if video_game:
+            merged[title]["video_games"].add(video_game)
+            
+        if billion_views:
+            merged[title]["billion_views"] = int(billion_views)
+            
+        if chart_position:
+            merged[title]["chart_positions"].add(int(chart_position))
+            
+        if artist_gender:
+            merged[title]["artist_genders"].add(artist_gender)
+            
+        if artist_type:
+            merged[title]["artist_types"].add(artist_type)
+            
+        if song_type:
+            merged[title]["song_types"].add(song_type)
+            
+        if duration:
+            merged[title]["duration"] = int(duration)
+            
+        if bpm:
+            merged[title]["bpm"] = int(bpm)
+            
+        if instrument:
+            merged[title]["instruments"].add(instrument)
+            
+        if theme:
+            merged[title]["themes"].add(theme)
+            
+        if location:
+            merged[title]["locations"].add(location)
 
         if merged[title]["publication_date"] is None and pub_date:
             merged[title]["publication_date"] = pub_date

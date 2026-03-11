@@ -10,12 +10,12 @@ def _get_bool(name: str, default: str = "false") -> bool:
 
 
 # Core inference / game configuration
-# Tuned to balance: not too early, but also not "never guessing".
+# Made more aggressive to guess earlier
 CONFIDENCE_THRESHOLD: float = float(
-    os.getenv("SONG_GENIE_CONFIDENCE_THRESHOLD", "0.80")
+    os.getenv("SONG_GENIE_CONFIDENCE_THRESHOLD", "0.65")  # Reduced from 0.80
 )
 DOMINANCE_RATIO: float = float(
-    os.getenv("SONG_GENIE_DOMINANCE_RATIO", "3.0")
+    os.getenv("SONG_GENIE_DOMINANCE_RATIO", "2.0")  # Reduced from 3.0
 )
 MAX_QUESTIONS: int = int(
     os.getenv("SONG_GENIE_MAX_QUESTIONS", "20")
@@ -24,13 +24,13 @@ MAX_QUESTIONS: int = int(
 # Minimum number of questions before the engine
 # is allowed to make a guess.
 MIN_QUESTIONS_BEFORE_GUESS: int = int(
-    os.getenv("SONG_GENIE_MIN_QUESTIONS_BEFORE_GUESS", "10")
+    os.getenv("SONG_GENIE_MIN_QUESTIONS_BEFORE_GUESS", "6")  # Reduced from 10
 )
 
 # Additional safety margin: how much more probable the top
 # candidate must be in absolute terms compared to runner up.
 MIN_CONFIDENCE_MARGIN: float = float(
-    os.getenv("SONG_GENIE_MIN_CONFIDENCE_MARGIN", "0.15")
+    os.getenv("SONG_GENIE_MIN_CONFIDENCE_MARGIN", "0.10")  # Reduced from 0.15
 )
 
 

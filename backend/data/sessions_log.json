@@ -1,0 +1,220 @@
+[
+  {
+    "session_id": "0628146e-d78d-4437-a358-9d4c3d1be295",
+    "questions": [
+      {
+        "feature": "genres",
+        "value": "pop music",
+        "answer": "yes"
+      },
+      {
+        "feature": "country",
+        "value": "United States",
+        "answer": "yes"
+      },
+      {
+        "feature": "artists",
+        "value": "Mariah Carey",
+        "answer": "no"
+      },
+      {
+        "feature": "era",
+        "value": "2000_2010",
+        "answer": "yes"
+      },
+      {
+        "feature": "genres",
+        "value": "dance-pop",
+        "answer": "unsure"
+      },
+      {
+        "feature": "decade",
+        "value": "2000s",
+        "answer": "yes"
+      },
+      {
+        "feature": "artists",
+        "value": "Katy Perry",
+        "answer": "no"
+      },
+      {
+        "feature": "genres",
+        "value": "electropop",
+        "answer": "unsure"
+      },
+      {
+        "feature": "artists",
+        "value": "Nelly Furtado",
+        "answer": "no"
+      },
+      {
+        "feature": "genres",
+        "value": "synth-pop",
+        "answer": "unsure"
+      },
+      {
+        "feature": "artists",
+        "value": "Madonna",
+        "answer": "no"
+      },
+      {
+        "feature": "era",
+        "value": "2010_2020",
+        "answer": "no"
+      },
+      {
+        "feature": "artists",
+        "value": "Lady Gaga",
+        "answer": "yes"
+      },
+      {
+        "feature": "genres",
+        "value": "contemporary R&B",
+        "answer": "unsure"
+      },
+      {
+        "feature": "decade",
+        "value": "2010s",
+        "answer": "no"
+      },
+      {
+        "feature": "era",
+        "value": "Before_2000",
+        "answer": "no"
+      },
+      {
+        "feature": "artists",
+        "value": "Kylie Minogue",
+        "answer": "no"
+      },
+      {
+        "feature": "country",
+        "value": "France",
+        "answer": "no"
+      },
+      {
+        "feature": "genres",
+        "value": "psychedelic rock",
+        "answer": "unsure"
+      },
+      {
+        "feature": "language",
+        "value": "English",
+        "answer": "yes"
+      }
+    ],
+    "final_song_id": 0,
+    "confidence": 0.5551376930717908,
+    "success": null,
+    "created_at": "2026-03-11T17:26:11.932462Z"
+  },
+  {
+    "session_id": "8e78a68b-d7bf-42e3-ba9b-6f6af619683a",
+    "questions": [
+      {
+        "feature": "genres",
+        "value": "pop music",
+        "answer": "yes"
+      },
+      {
+        "feature": "country",
+        "value": "United States",
+        "answer": "yes"
+      },
+      {
+        "feature": "artists",
+        "value": "Mariah Carey",
+        "answer": "no"
+      },
+      {
+        "feature": "era",
+        "value": "2000_2010",
+        "answer": "yes"
+      },
+      {
+        "feature": "genres",
+        "value": "dance-pop",
+        "answer": "unsure"
+      },
+      {
+        "feature": "artists",
+        "value": "Katy Perry",
+        "answer": "no"
+      },
+      {
+        "feature": "genres",
+        "value": "reggae",
+        "answer": "unsure"
+      },
+      {
+        "feature": "artists",
+        "value": "Madonna",
+        "answer": "no"
+      },
+      {
+        "feature": "genres",
+        "value": "contemporary R&B",
+        "answer": "unsure"
+      },
+      {
+        "feature": "artists",
+        "value": "Nelly Furtado",
+        "answer": "no"
+      },
+      {
+        "feature": "artists",
+        "value": "Rihanna",
+        "answer": "no"
+      },
+      {
+        "feature": "genres",
+        "value": "synth-pop",
+        "answer": "unsure"
+      },
+      {
+        "feature": "genres",
+        "value": "electropop",
+        "answer": "unsure"
+      },
+      {
+        "feature": "artists",
+        "value": "Lady Gaga",
+        "answer": "yes"
+      },
+      {
+        "feature": "language",
+        "value": "English",
+        "answer": "yes"
+      },
+      {
+        "feature": "genres",
+        "value": "country music",
+        "answer": "unsure"
+      },
+      {
+        "feature": "genres",
+        "value": "rock music",
+        "answer": "unsure"
+      },
+      {
+        "feature": "artists",
+        "value": "Taylor Swift",
+        "answer": "no"
+      },
+      {
+        "feature": "genres",
+        "value": "psychedelic rock",
+        "answer": "unsure"
+      },
+      {
+        "feature": "artists",
+        "value": "Kylie Minogue",
+        "answer": "no"
+      }
+    ],
+    "final_song_id": 0,
+    "confidence": 0.4556980823850451,
+    "success": null,
+    "created_at": "2026-03-11T17:31:01.599622Z"
+  }
+]
