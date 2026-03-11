@@ -1,7 +1,11 @@
 from backend.logic.engine import Engine
 from backend.logic.belief import update_beliefs
 from backend.logic.questions import select_best_question
-from backend.logic.config import CONFIDENCE_THRESHOLD, MAX_QUESTIONS
+from backend.logic.config import (
+    CONFIDENCE_THRESHOLD,
+    MAX_QUESTIONS,
+    MIN_QUESTIONS_BEFORE_GUESS,
+)
 
 
 class Game:
@@ -44,12 +48,17 @@ class Game:
         return best_song_id, best_prob
 
     def should_guess(self):
+        # Enforce a minimum number of questions before guessing,
+        # so the game cannot converge after only 1–2 answers.
+        if self.question_count < MIN_QUESTIONS_BEFORE_GUESS:
+            return False
+
         probs = sorted(self.beliefs.values(), reverse=True)
 
-        if probs[0] >= CONFIDENCE_THRESHOLD:
-            return True
+        top = probs[0]
+        second = probs[1] if len(probs) > 1 else 0.0
 
-        if len(probs) > 1 and (probs[0] - probs[1]) >= 0.2:
+        if top >= CONFIDENCE_THRESHOLD and (second == 0.0 or top - second >= 0.2):
             return True
 
         return False

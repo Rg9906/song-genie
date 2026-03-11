@@ -5,7 +5,7 @@ from flask import Flask, jsonify, request, send_from_directory
 from flask_cors import CORS
 
 from backend.logic.engine import Engine
-from backend.logic.belief import update_beliefs, update_memory
+from backend.logic.belief import update_beliefs
 from backend.logic.questions import select_best_question
 from backend.logic.kg_loader import fetch_song_by_title, append_song
 from backend.logic.analytics import log_session, log_feedback
@@ -16,6 +16,9 @@ from backend.logic.config import (
     FLASK_HOST,
     FLASK_PORT,
     SESSION_TTL_SECONDS,
+    MIN_QUESTIONS_BEFORE_GUESS,
+    MIN_CONFIDENCE_MARGIN,
+    MAX_QUESTIONS,
 )
 
 
@@ -30,7 +33,12 @@ class Session:
 
     def __init__(self):
 
-        self.engine = Engine()
+        global global_engine
+        
+        if global_engine is None:
+            global_engine = Engine()
+
+        self.engine = global_engine
 
         self.songs = self.engine.get_entities()
 
@@ -92,6 +100,9 @@ class SessionManager:
 
 
 session_manager = SessionManager()
+
+# Global engine reference for reloading
+global_engine = None
 
 
 # Start new game
@@ -162,42 +173,93 @@ def answer():
     sorted_beliefs = sorted(
         session.beliefs.items(),
         key=lambda x: x[1],
-        reverse=True
+        reverse=True,
     )
 
     best_id, p1 = sorted_beliefs[0]
+    p2 = sorted_beliefs[1][1] if len(sorted_beliefs) > 1 else 0.0
 
-    p2 = sorted_beliefs[1][1] if len(sorted_beliefs) > 1 else 0
+    # Precompute top-k candidates for result payloads
+    top_k = 3
+    top_candidates = sorted_beliefs[:top_k]
+    id_to_song = {song["id"]: song for song in session.songs}
+
+    # How many questions have been answered so far in this session.
+    num_questions = len(session.history)
+
+    # Hard cap: after MAX_QUESTIONS, stop asking and go to learn mode.
+    if num_questions >= MAX_QUESTIONS:
+
+        # Log this as a low-confidence session for analytics.
+        log_session(
+            session_id=session_id,
+            questions=session.history,
+            final_song_id=best_id,
+            confidence=p1,
+        )
+
+        return jsonify({
+
+            "type": "learn",
+            "message": "I couldn't confidently guess your song within the question limit. What song were you thinking of?",
+            "top_songs": [
+                {
+                    "song": id_to_song.get(song_id),
+                    "probability": prob,
+                }
+                for song_id, prob in top_candidates
+                if id_to_song.get(song_id) is not None
+            ],
+
+        })
+
+    # Confidence condition met → return result.
+    # We now require:
+    # - enough questions asked (MIN_QUESTIONS_BEFORE_GUESS)
+    # - AND high absolute confidence
+    # - AND clear dominance over the runner-up (ratio)
+    # - AND a minimum absolute margin over the runner-up
+    if (
+        num_questions >= MIN_QUESTIONS_BEFORE_GUESS
+        and p1 >= CONFIDENCE_THRESHOLD
+        and (p2 == 0.0 or p1 / p2 >= DOMINANCE_RATIO)
+        and (p1 - p2) >= MIN_CONFIDENCE_MARGIN
+    ):
+
+        # Only log the session here; actual learning
+        # (updating memory) happens when the user
+        # confirms via the /feedback endpoint.
+        log_session(
+            session_id=session_id,
+            questions=session.history,
+            final_song_id=best_id,
+            confidence=p1,
+        )
+
+        primary_song = id_to_song.get(best_id)
+
+        return jsonify({
+
+            "type": "result",
+
+            # Backwards compatible primary guess
+            "song": primary_song,
+            "confidence": p1,
+
+            # New: top-k candidates with probabilities
+            "top_songs": [
+                {
+                    "song": id_to_song.get(song_id),
+                    "probability": prob,
+                }
+                for song_id, prob in top_candidates
+                if id_to_song.get(song_id) is not None
+            ],
+
+        })
 
 
-    # Confidence condition met → return result
-    if p1 >= CONFIDENCE_THRESHOLD or (p2 > 0 and p1 / p2 >= DOMINANCE_RATIO):
-
-        for song in session.songs:
-
-            if song["id"] == best_id:
-
-                update_memory(best_id)
-
-                log_session(
-                    session_id=session_id,
-                    questions=session.history,
-                    final_song_id=best_id,
-                    confidence=p1,
-                )
-
-                return jsonify({
-
-                    "type": "result",
-
-                    "song": song,
-
-                    "confidence": p1
-
-                })
-
-
-    # Otherwise ask next question
+    # Otherwise ask next question (or admit we don't know)
     question = select_best_question(
         session.questions,
         session.songs,
@@ -207,9 +269,13 @@ def answer():
 
     if question is None:
 
+        # We've exhausted discriminative questions without
+        # reaching a confident guess. Signal that we don't
+        # know and let the frontend trigger learning mode.
         return jsonify({
 
-            "type": "unknown"
+            "type": "learn",
+            "message": "I couldn't confidently guess your song. What song were you thinking of?"
 
         })
 
@@ -231,6 +297,8 @@ def answer():
 @app.route("/learn", methods=["POST"])
 def learn():
 
+    global global_engine
+
     data = request.json
 
     title = data.get("title")
@@ -244,6 +312,10 @@ def learn():
     if song:
 
         append_song(song)
+
+        # Reload the global engine to include the new song
+        if global_engine:
+            global_engine.reload()
 
         return jsonify({
 
@@ -271,6 +343,38 @@ def health():
         "status": "ok"
 
     })
+
+
+@app.route("/feedback", methods=["POST"])
+def feedback():
+
+    data = request.json or {}
+    session_id = data.get("session_id")
+    correct = data.get("correct")
+    correct_song_title = data.get("correct_song_title")
+
+    if not session_id or correct is None:
+        return jsonify({"error": "session_id and correct required"}), 400
+
+    log_feedback(
+        session_id=session_id,
+        success=bool(correct),
+        correct_song_title=correct_song_title,
+    )
+
+    return jsonify({"status": "ok"})
+
+
+@app.route("/sessions", methods=["GET"])
+def sessions_view():
+    from backend.logic.analytics import get_session_summaries
+    return jsonify({"sessions": get_session_summaries()})
+
+
+@app.route("/insights", methods=["GET"])
+def insights_view():
+    from backend.logic.analytics import get_insights
+    return jsonify(get_insights())
 
 
 # Serve frontend (optional)

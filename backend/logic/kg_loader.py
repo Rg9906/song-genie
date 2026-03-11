@@ -11,7 +11,19 @@ WIKIDATA_SPARQL_URL = "https://query.wikidata.org/sparql"
 
 
 SPARQL_QUERY = """
-SELECT ?song ?songLabel ?artistLabel ?genreLabel ?pubDate ?languageLabel ?countryLabel WHERE {
+SELECT
+  ?song ?songLabel
+  ?artistLabel
+  ?genreLabel
+  ?pubDate
+  ?languageLabel
+  ?countryLabel
+  ?awardLabel
+  ?labelLabel
+  ?producerLabel
+  ?composerLabel
+  ?partOfLabel
+WHERE {
   ?song wdt:P31 wd:Q7366.
   ?song wdt:P175 ?artist.
   ?song wdt:P136 ?genre.
@@ -19,13 +31,19 @@ SELECT ?song ?songLabel ?artistLabel ?genreLabel ?pubDate ?languageLabel ?countr
   ?song wdt:P407 ?language.
 
   ?song wikibase:sitelinks ?linkCount.
-  FILTER(?linkCount > 15)
+  # Slightly relaxed popularity filter + higher LIMIT
+  FILTER(?linkCount > 10)
 
   OPTIONAL { ?song wdt:P495 ?country. }
+  OPTIONAL { ?song wdt:P166 ?award. }     # award received
+  OPTIONAL { ?song wdt:P264 ?label. }     # record label
+  OPTIONAL { ?song wdt:P162 ?producer. }  # producer
+  OPTIONAL { ?song wdt:P86  ?composer. }  # composer
+  OPTIONAL { ?song wdt:P361 ?partOf. }    # part of (e.g. soundtrack/album)
 
   SERVICE wikibase:label { bd:serviceParam wikibase:language "en". }
 }
-LIMIT 100
+LIMIT 500
 """
 
 
@@ -134,6 +152,11 @@ def normalize_results(results: Dict[str, Any]) -> List[Dict[str, Any]]:
         pub_date = item.get("pubDate", {}).get("value")
         language = item.get("languageLabel", {}).get("value")
         country = item.get("countryLabel", {}).get("value")
+        award = item.get("awardLabel", {}).get("value")
+        label = item.get("labelLabel", {}).get("value")
+        producer = item.get("producerLabel", {}).get("value")
+        composer = item.get("composerLabel", {}).get("value")
+        part_of = item.get("partOfLabel", {}).get("value")
 
         if title is None:
             continue
@@ -152,7 +175,18 @@ def normalize_results(results: Dict[str, Any]) -> List[Dict[str, Any]]:
 
                 "language": language,
 
-                "country": country
+                "country": country,
+
+                # richer, optional attributes
+                "awards": set(),
+
+                "labels": set(),
+
+                "producers": set(),
+
+                "composers": set(),
+
+                "part_of": set(),
 
             }
 
@@ -161,6 +195,21 @@ def normalize_results(results: Dict[str, Any]) -> List[Dict[str, Any]]:
 
         if genre:
             merged[title]["genres"].add(genre)
+
+        if award:
+            merged[title]["awards"].add(award)
+
+        if label:
+            merged[title]["labels"].add(label)
+
+        if producer:
+            merged[title]["producers"].add(producer)
+
+        if composer:
+            merged[title]["composers"].add(composer)
+
+        if part_of:
+            merged[title]["part_of"].add(part_of)
 
         if merged[title]["publication_date"] is None and pub_date:
             merged[title]["publication_date"] = pub_date
@@ -191,7 +240,17 @@ def normalize_results(results: Dict[str, Any]) -> List[Dict[str, Any]]:
 
             "language": entry["language"],
 
-            "country": entry["country"]
+            "country": entry["country"],
+
+            "awards": list(entry["awards"]),
+
+            "labels": list(entry["labels"]),
+
+            "producers": list(entry["producers"]),
+
+            "composers": list(entry["composers"]),
+
+            "part_of": list(entry["part_of"]),
 
         })
 

@@ -4,6 +4,7 @@ from datetime import datetime
 from typing import Any, Dict, List, Optional, Tuple
 
 from backend.logic.config import ANALYTICS_CACHE_SECONDS
+# Memory functions removed to prevent bias loops
 
 
 _CACHE = {"loaded_at": None, "sessions": None}
@@ -91,6 +92,9 @@ def log_feedback(
             break
     if updated:
         _save_all_sessions(sessions)
+
+        # Memory reinforcement removed to prevent bias loops
+        # The system should rely on Bayesian inference, not reinforcement
 
 
 def compute_question_stats() -> Dict[Tuple[str, Any], Dict[str, float]]:
