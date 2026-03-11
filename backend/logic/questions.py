@@ -9,14 +9,40 @@ from backend.logic.analytics import compute_question_stats
 # on low-level identifiers like specific artists/countries.
 # Higher weight → relatively more preferred questions.
 FEATURE_WEIGHTS = {
+    # High-value distinguishing features
+    "artist_genders": 1.2,  # male/female splits many songs
+    "artist_types": 1.1,   # solo/duo/group very powerful
+    "song_types": 1.0,     # single/album track
+    "films": 0.95,         # movie soundtrack
+    "tv_series": 0.95,     # TV show
+    "video_games": 0.9,    # video game
+    "billion_views": 0.9,  # viral hits
+    
+    # Traditional good features
     "genres": 1.0,
     "language": 0.9,
-    "country": 0.7,
-    "artists": 0.5,
     "era": 0.8,
     "decade": 0.8,
     "awards": 0.85,
+    
+    # Musical characteristics
+    "instruments": 0.8,
+    "bpm_category": 0.75,
+    "duration_category": 0.7,
+    "themes": 0.75,
+    
+    # Medium value
     "labels": 0.75,
+    "producers": 0.7,
+    "composers": 0.7,
+    "chart_positions": 0.8,
+    
+    # Lower value (more specific)
+    "artists": 0.5,
+    "country": 0.6,
+    "locations": 0.6,
+    "performers": 0.6,
+    "vocalists": 0.6,
 }
 
 
@@ -30,6 +56,72 @@ def make_question_text(feature, value):
             f"Is the artist {value}?",
             f"Does it feature {value}?",
             f"Is {value} involved in this track?",
+        ]
+    elif feature == "artist_genders":
+        templates = [
+            f"Is the artist {value}?",
+            f"Is it performed by a {value} artist?",
+            f"Is the main vocalist {value}?",
+        ]
+    elif feature == "artist_types":
+        templates = [
+            f"Is it by a {value}?",
+            f"Is the artist a {value}?",
+            f"Is it performed by a {value}?",
+        ]
+    elif feature == "song_types":
+        templates = [
+            f"Is it a {value}?",
+            f"Was it released as a {value}?",
+        ]
+    elif feature == "films":
+        templates = [
+            f"Is it from the movie {value}?",
+            f"Was it featured in {value}?",
+            f"Is it on the {value} soundtrack?",
+        ]
+    elif feature == "tv_series":
+        templates = [
+            f"Is it from the TV show {value}?",
+            f"Was it featured in {value}?",
+            f"Is it the theme for {value}?",
+        ]
+    elif feature == "video_games":
+        templates = [
+            f"Is it from the video game {value}?",
+            f"Was it featured in {value}?",
+            f"Is it part of the {value} soundtrack?",
+        ]
+    elif feature == "billion_views":
+        templates = [
+            f"Does it have over a billion views?",
+            f"Is it a billion-view hit?",
+        ]
+    elif feature == "instruments":
+        templates = [
+            f"Does it feature {value}?",
+            f"Is {value} played in this song?",
+            f"Can you hear {value} in this track?",
+        ]
+    elif feature == "bpm_category":
+        templates = [
+            f"Is it a {value} tempo song?",
+            f"Would you describe the tempo as {value}?",
+        ]
+    elif feature == "duration_category":
+        templates = [
+            f"Is it a {value} song?",
+            f"Would you say it's {value} in length?",
+        ]
+    elif feature == "themes":
+        templates = [
+            f"Is it about {value}?",
+            f"Does it have a {value} theme?",
+        ]
+    elif feature == "chart_positions":
+        templates = [
+            f"Did it reach #{value} on the charts?",
+            f"Was it a chart hit at position {value}?",
         ]
     elif feature == "genres":
         templates = [
@@ -147,22 +239,49 @@ def extract_value_counts(entities, attribute):
 def generate_all_questions(entities):
     """
     Dynamically generate all questions from KG attributes.
+    Enhanced with diverse attributes for better questioning.
     """
 
-    # Order reflects rough preference: genres / language / era tend to be
-    # more semantically helpful early, artists/country later. Awards/labels
-    # are specialised and typically asked mid/late game.
+    # Prioritized attributes for optimal question selection
     attributes = [
+        # High-value distinguishing features (ask early)
+        "artist_genders",
+        "artist_types", 
+        "song_types",
+        "billion_views",
+        
+        # Media connections (very distinguishing)
+        "films",
+        "tv_series", 
+        "video_games",
+        
+        # Traditional good features
         "genres",
         "language",
         "era",
         "decade",
         "awards",
+        
+        # Musical characteristics
+        "instruments",
+        "bpm_category",
+        "duration_category",
+        "themes",
+        "chart_positions",
+        
+        # Production details
         "labels",
         "producers",
         "composers",
+        
+        # Location and performance
+        "locations",
+        "performers",
+        "vocalists",
+        
+        # Lower priority (more specific)
         "part_of",
-        "country",
+        "country", 
         "artists",
     ]
 
@@ -178,6 +297,19 @@ def generate_all_questions(entities):
         "producers": 2,
         "composers": 2,
         "part_of": 2,
+        "performers": 2,
+        "vocalists": 2,
+        "locations": 2,
+        "themes": 2,
+        "instruments": 2,
+        # Enhanced attributes with lower thresholds
+        "artist_genders": 1,  # Even 1 is valuable
+        "artist_types": 1,
+        "song_types": 1,
+        "films": 1,
+        "tv_series": 1,
+        "video_games": 1,
+        "chart_positions": 2,
     }
 
     for attribute in attributes:

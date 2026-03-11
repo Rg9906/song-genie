@@ -65,6 +65,23 @@ class Engine:
             entity["composers"] = item.get("composers", [])
             entity["part_of"] = item.get("part_of", [])
 
+            # Enhanced attributes
+            entity["performers"] = item.get("performers", [])
+            entity["vocalists"] = item.get("vocalists", [])
+            entity["films"] = item.get("films", [])
+            entity["tv_series"] = item.get("tv_series", [])
+            entity["video_games"] = item.get("video_games", [])
+            entity["billion_views"] = item.get("billion_views")
+            entity["chart_positions"] = item.get("chart_positions", [])
+            entity["artist_genders"] = item.get("artist_genders", [])
+            entity["artist_types"] = item.get("artist_types", [])
+            entity["song_types"] = item.get("song_types", [])
+            entity["duration"] = item.get("duration")
+            entity["bpm"] = item.get("bpm")
+            entity["instruments"] = item.get("instruments", [])
+            entity["themes"] = item.get("themes", [])
+            entity["locations"] = item.get("locations", [])
+
             # Derived, more "graph-like" facts for richer reasoning.
             facts = []
 
@@ -94,6 +111,67 @@ class Engine:
 
             for part in entity["part_of"]:
                 facts.append(("part_of", part))
+
+            # Enhanced attributes facts
+            for performer in entity["performers"]:
+                facts.append(("performers", performer))
+                
+            for vocalist in entity["vocalists"]:
+                facts.append(("vocalists", vocalist))
+                
+            for film in entity["films"]:
+                facts.append(("films", film))
+                
+            for tv_series in entity["tv_series"]:
+                facts.append(("tv_series", tv_series))
+                
+            for video_game in entity["video_games"]:
+                facts.append(("video_games", video_game))
+                
+            for chart_position in entity["chart_positions"]:
+                facts.append(("chart_positions", chart_position))
+                
+            for artist_gender in entity["artist_genders"]:
+                facts.append(("artist_genders", artist_gender))
+                
+            for artist_type in entity["artist_types"]:
+                facts.append(("artist_types", artist_type))
+                
+            for song_type in entity["song_types"]:
+                facts.append(("song_types", song_type))
+                
+            for instrument in entity["instruments"]:
+                facts.append(("instruments", instrument))
+                
+            for theme in entity["themes"]:
+                facts.append(("themes", theme))
+                
+            for location in entity["locations"]:
+                facts.append(("locations", location))
+
+            # Special numeric facts
+            if entity["billion_views"]:
+                facts.append(("billion_views", "yes"))
+                
+            if entity["duration"]:
+                # Duration categories
+                duration = entity["duration"]
+                if duration < 120:
+                    facts.append(("duration_category", "short"))
+                elif duration < 240:
+                    facts.append(("duration_category", "medium"))
+                else:
+                    facts.append(("duration_category", "long"))
+                    
+            if entity["bpm"]:
+                # BPM categories  
+                bpm = entity["bpm"]
+                if bpm < 90:
+                    facts.append(("bpm_category", "slow"))
+                elif bpm < 130:
+                    facts.append(("bpm_category", "medium"))
+                else:
+                    facts.append(("bpm_category", "fast"))
 
             pub_date = entity["publication_date"]
             year = None
