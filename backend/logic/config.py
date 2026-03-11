@@ -54,7 +54,8 @@ REQUEST_TIMEOUT_SECONDS: float = float(
 
 # Bandit / learning configuration
 # Controls how much historical "question success" influences the question pick.
-BANDIT_LAMBDA: float = float(os.getenv("SONG_GENIE_BANDIT_LAMBDA", "0.1"))
+# Set to 0 to prevent bias from historical data
+BANDIT_LAMBDA: float = float(os.getenv("SONG_GENIE_BANDIT_LAMBDA", "0.0"))
 # Cache analytics (disk) reads for this many seconds.
 ANALYTICS_CACHE_SECONDS: int = int(os.getenv("SONG_GENIE_ANALYTICS_CACHE_SECONDS", "5"))
 

@@ -356,13 +356,8 @@ from backend.logic.config import BANDIT_LAMBDA  # noqa: E402
 
 def select_best_question(questions, songs, beliefs, asked):
     """
-    Thompson-sampling style selection:
-    - Base score = information gain (entropy drop)
-    - Bandit term = sampled from Beta(successes+1, failures+1) per question
-    - Final score = base_score + BANDIT_LAMBDA * bandit_sample
+    Pure information gain selection - no bandit to prevent bias
     """
-    stats = compute_question_stats()
-
     best_question = None
     best_score = -1.0
 
@@ -379,21 +374,10 @@ def select_best_question(questions, songs, beliefs, asked):
         feature_weight = FEATURE_WEIGHTS.get(feature, 1.0)
         asked_feature_count = sum(1 for (f, _) in asked if f == feature)
         diversity_factor = 1.0 / (1.0 + asked_feature_count)
-        adjusted_base = base_score * feature_weight * diversity_factor
+        adjusted_score = base_score * feature_weight * diversity_factor
 
-        q_stats = stats.get(key, {})
-        count = float(q_stats.get("count", 0.0))
-        success_count = float(q_stats.get("success_count", 0.0))
-        failures = max(count - success_count, 0.0)
-
-        alpha = success_count + 1.0
-        beta_param = failures + 1.0
-        bandit_sample = random.betavariate(alpha, beta_param)
-
-        score = adjusted_base + (BANDIT_LAMBDA * bandit_sample)
-
-        if score > best_score:
-            best_score = score
+        if adjusted_score > best_score:
+            best_score = adjusted_score
             best_question = q
 
     return best_question
