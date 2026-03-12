@@ -31,13 +31,16 @@ CORS(app)
 
 class Session:
 
-    def __init__(self, use_embeddings: bool = False):
+    def __init__(self, enable_graph: bool = True, enable_embeddings: bool = False):
 
         global global_engine
         
         if global_engine is None:
-            from backend.logic.embedding_engine import create_engine
-            global_engine = create_engine(use_embeddings=use_embeddings)
+            from backend.logic.hybrid_engine import create_hybrid_engine
+            global_engine = create_hybrid_engine(
+                enable_graph=enable_graph, 
+                enable_embeddings=enable_embeddings
+            )
 
         self.engine = global_engine
 
@@ -75,14 +78,15 @@ class SessionManager:
         for key in expired_keys:
             self._sessions.pop(key, None)
 
-    def create(self):
+    def create(self, enable_graph: bool = True, enable_embeddings: bool = False) -> Tuple[str, Session]:
         """
         Create a new session and return (session_id, session).
         """
         self.cleanup()
         session_id = str(uuid.uuid4())
-        session = Session()
+        session = Session(enable_graph=enable_graph, enable_embeddings=enable_embeddings)
         self._sessions[session_id] = (session, datetime.utcnow())
+        log_new_session(session_id)
         return session_id, session
 
     def get(self, session_id):
@@ -106,12 +110,16 @@ session_manager = SessionManager()
 global_engine = None
 
 
-# Start new game with optional embedding support
+# Start new game with optional embedding and graph support
 @app.route("/start", methods=["GET"])
 def start():
-    use_embeddings = request.args.get("embeddings", "false").lower() == "true"
+    enable_graph = request.args.get("graph", "true").lower() == "true"
+    enable_embeddings = request.args.get("embeddings", "false").lower() == "true"
     
-    session_id, session = session_manager.create(use_embeddings=use_embeddings)
+    session_id, session = session_manager.create(
+        enable_graph=enable_graph, 
+        enable_embeddings=enable_embeddings
+    )
 
     question = select_best_question(
         session.questions,
@@ -131,7 +139,9 @@ def start():
             "text": question["text"]
         },
         "total_questions": len(session.questions),
-        "embeddings_enabled": use_embeddings
+        "graph_enabled": enable_graph,
+        "embeddings_enabled": enable_embeddings,
+        "system_status": session.engine.get_system_status() if hasattr(session.engine, 'get_system_status') else None
     })
 
 
@@ -310,7 +320,8 @@ def answer():
         session.questions,
         session.songs,
         session.beliefs,
-        session.asked
+        session.asked,
+        session.engine
     )
 
     if question is None:
