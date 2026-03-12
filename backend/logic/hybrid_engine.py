@@ -15,11 +15,19 @@ try:
     EMBEDDINGS_AVAILABLE = True
 except ImportError:
     EMBEDDINGS_AVAILABLE = False
+    torch = None
+
+# Only import embedding modules if available
+if EMBEDDINGS_AVAILABLE:
+    from backend.logic.embeddings import EmbeddingTrainer, MetadataEncoder
+    from backend.logic.embedding_questions import EmbeddingQuestionSystem
+else:
+    EmbeddingTrainer = None
+    MetadataEncoder = None
+    EmbeddingQuestionSystem = None
 
 from backend.logic.engine import Engine as BaseEngine
 from backend.logic.dynamic_graph import DynamicWikidataGraph, build_dynamic_graph
-from backend.logic.embeddings import EmbeddingTrainer, MetadataEncoder
-from backend.logic.embedding_questions import EmbeddingQuestionSystem
 
 
 class HybridIntelligence:
