@@ -31,12 +31,13 @@ CORS(app)
 
 class Session:
 
-    def __init__(self):
+    def __init__(self, use_embeddings: bool = False):
 
         global global_engine
         
         if global_engine is None:
-            global_engine = Engine()
+            from backend.logic.embedding_engine import create_engine
+            global_engine = create_engine(use_embeddings=use_embeddings)
 
         self.engine = global_engine
 
@@ -105,32 +106,77 @@ session_manager = SessionManager()
 global_engine = None
 
 
-# Start new game
+# Start new game with optional embedding support
 @app.route("/start", methods=["GET"])
 def start():
-
-    session_id, session = session_manager.create()
+    use_embeddings = request.args.get("embeddings", "false").lower() == "true"
+    
+    session_id, session = session_manager.create(use_embeddings=use_embeddings)
 
     question = select_best_question(
         session.questions,
         session.songs,
         session.beliefs,
-        session.asked
+        session.asked,
+        session.engine
     )
 
+    session.asked.add((question["feature"], question["value"]))
+
     return jsonify({
-
         "session_id": session_id,
-
-        "type": "question",
-
-        "feature": question["feature"],
-
-        "value": question["value"],
-
-        "text": question["text"]
-
+        "question": {
+            "feature": question["feature"],
+            "value": question["value"],
+            "text": question["text"]
+        },
+        "total_questions": len(session.questions),
+        "embeddings_enabled": use_embeddings
     })
+
+
+# Get song similarities using embeddings
+@app.route("/similar", methods=["GET"])
+def similar_songs():
+    song_title = request.args.get("song")
+    top_k = int(request.args.get("top_k", 5))
+    
+    if not song_title:
+        return jsonify({"error": "song parameter required"}), 400
+    
+    global global_engine
+    if not global_engine or not hasattr(global_engine, 'find_similar_songs'):
+        return jsonify({"error": "Embeddings not available"}), 400
+    
+    try:
+        similar = global_engine.find_similar_songs(song_title, top_k)
+        return jsonify({
+            "song": song_title,
+            "similar_songs": similar,
+            "embeddings_available": True
+        })
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+# Explain similarity between two songs
+@app.route("/explain", methods=["GET"])
+def explain_similarity():
+    song1 = request.args.get("song1")
+    song2 = request.args.get("song2")
+    
+    if not song1 or not song2:
+        return jsonify({"error": "song1 and song2 parameters required"}), 400
+    
+    global global_engine
+    if not global_engine or not hasattr(global_engine, 'explain_similarity'):
+        return jsonify({"error": "Embeddings not available"}), 400
+    
+    try:
+        explanation = global_engine.explain_similarity(song1, song2)
+        return jsonify(explanation)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 
 # Submit answer
@@ -293,44 +339,42 @@ def answer():
     })
 
 
-# Learn new song from Wikidata
+# Learn new song from Wikidata with smart pattern analysis
 @app.route("/learn", methods=["POST"])
 def learn():
-
     global global_engine
 
     data = request.json
-
     title = data.get("title")
-
+    session_id = data.get("session_id")  # Get session ID for analysis
+    
     if not title:
-
         return jsonify({"error": "title required"}), 400
 
-    song = fetch_song_by_title(title)
-
-    if song:
-
-        append_song(song)
-
-        # Reload the global engine to include the new song
+    # Get session data for pattern analysis
+    session = session_manager.get(session_id) if session_id else None
+    session_questions = session.history if session else []
+    
+    # Use smart learning system
+    from backend.logic.learning import learn_from_feedback
+    
+    result = learn_from_feedback(session_id, session_questions, title.strip())
+    
+    if result["status"] in ["learned", "updated"]:
+        # Reload the global engine to include the new/updated song
         if global_engine:
             global_engine.reload()
-
+        
         return jsonify({
-
-            "status": "learned",
-
-            "song": song["title"]
-
+            "status": result["status"],
+            "song": title,
+            "analysis": result.get("analysis_summary", {})
         })
-
     else:
-
         return jsonify({
-
-            "status": "not_found"
-
+            "status": "failed",
+            "reason": result.get("reason", "Unknown error"),
+            "song": title
         })
 
 
@@ -345,24 +389,58 @@ def health():
     })
 
 
+# Submit feedback with smart learning for wrong guesses
 @app.route("/feedback", methods=["POST"])
 def feedback():
-
-    data = request.json or {}
+    """
+    Handle user feedback with smart learning for wrong guesses.
+    """
+    data = request.json
     session_id = data.get("session_id")
     correct = data.get("correct")
-    correct_song_title = data.get("correct_song_title")
-
+    correct_song_title = data.get("correct_song_title")  # User-provided correct song
+    
     if not session_id or correct is None:
         return jsonify({"error": "session_id and correct required"}), 400
 
-    log_feedback(
-        session_id=session_id,
-        success=bool(correct),
-        correct_song_title=correct_song_title,
-    )
+    session = session_manager.get(session_id)
+    if not session:
+        return jsonify({"error": "session not found"}), 404
 
-    return jsonify({"status": "ok"})
+    # Log basic feedback
+    log_feedback(session_id, correct, correct_song_title)
+
+    # If the guess was wrong and user provided correct song, apply smart learning
+    if not correct and correct_song_title:
+        try:
+            from backend.logic.smart_learning import learn_from_wrong_guess
+            
+            learning_result = learn_from_wrong_guess(
+                session_id, 
+                session.history, 
+                correct_song_title.strip()
+            )
+            
+            # Reload engine if learning was successful
+            if learning_result.get("status") == "learned":
+                global global_engine
+                if global_engine:
+                    global_engine.reload()
+            
+            return jsonify({
+                "status": "processed",
+                "learning": learning_result
+            })
+            
+        except Exception as e:
+            # Log error but don't fail the feedback
+            print(f"Smart learning error: {e}")
+            return jsonify({
+                "status": "processed",
+                "learning": {"status": "failed", "reason": "Learning system error"}
+            })
+    
+    return jsonify({"status": "processed"})
 
 
 @app.route("/sessions", methods=["GET"])

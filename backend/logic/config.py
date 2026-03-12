@@ -51,6 +51,9 @@ REQUEST_TIMEOUT_SECONDS: float = float(
     os.getenv("SONG_GENIE_REQUEST_TIMEOUT_SECONDS", "5.0")
 )
 
+# Wikidata configuration
+WIKIDATA_SPARQL_URL: str = "https://query.wikidata.org/sparql"
+
 
 # Bandit / learning configuration
 # Controls how much historical "question success" influences the question pick.

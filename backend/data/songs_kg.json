@@ -11,7 +11,15 @@
     ],
     "publication_date": "2009-03-24T00:00:00Z",
     "language": "English",
-    "country": "United States"
+    "country": "United States",
+    "artist_genders": ["female"],
+    "artist_types": ["solo artist"],
+    "song_types": ["single"],
+    "billion_views": 1000000000,
+    "instruments": ["synthesizer", "piano"],
+    "themes": ["love", "sexuality"],
+    "duration": 216,
+    "bpm": 104
   },
   {
     "id": 1,
@@ -29,7 +37,14 @@
     ],
     "publication_date": "2010-12-16T00:00:00Z",
     "language": "English",
-    "country": "United States"
+    "country": "United States",
+    "artist_genders": ["male", "female"],
+    "artist_types": ["duo", "group"],
+    "song_types": ["single"],
+    "billion_views": 2000000000,
+    "themes": ["partying", "celebration"],
+    "duration": 258,
+    "bpm": 130
   },
   {
     "id": 2,

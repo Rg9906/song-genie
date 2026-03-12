@@ -2,8 +2,6 @@ import math
 import random
 
 from backend.logic.belief import compute_likelihood, normalize
-from backend.logic.analytics import compute_question_stats
-
 
 # Heuristic feature-level weights so we don't over-focus
 # on low-level identifiers like specific artists/countries.

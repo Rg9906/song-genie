@@ -1,37 +1,31 @@
 import json
 import os
-from typing import List, Dict, Any
 
-from backend.logic.dynamic_graph import DynamicWikidataGraph
+from backend.logic.belief import initialize_beliefs
+from backend.logic.questions import generate_all_questions
 
 
 class Engine:
 
-    def __init__(self, use_dynamic_graph: bool = False):  # Disabled for now
+    def __init__(self):
 
-        self.use_dynamic_graph = use_dynamic_graph
-        
-        # Load traditional data first (fallback)
-        self.entities = self._load_entities()
-        self.beliefs = self._initialize_beliefs()
-        self.questions = self._generate_questions()
-        
-        # Load dynamic graph if enabled
-        if self.use_dynamic_graph:
-            self.dynamic_graph = self._load_dynamic_graph()
-            self._enhance_with_dynamic_graph()
-        else:
-            self.dynamic_graph = None
+        # resolve absolute path safely
+        self.data_path = os.path.join(
+            os.path.dirname(__file__),
+            "..",
+            "data",
+            "songs_kg.json"
+        )
 
-    def _load_entities(self) -> List[Dict[str, Any]]:
+        self.entities = []
 
-        # Load the knowledge graph from JSON
+        self.beliefs = {}
 
-        base_dir = os.path.dirname(__file__)
+        self.questions = []
 
-        path = os.path.join(base_dir, "..", "data", "songs_kg.json")
+        # initial load
+        self.load()
 
-        with open(path, "r", encoding="utf-8") as f:
 
             data = json.load(f)
 
@@ -63,7 +57,6 @@ class Engine:
             entity["films"] = item.get("films", [])
             entity["tv_series"] = item.get("tv_series", [])
             entity["video_games"] = item.get("video_games", [])
-            entity["billion_views"] = item.get("billion_views")
             entity["chart_positions"] = item.get("chart_positions", [])
             entity["artist_genders"] = item.get("artist_genders", [])
             entity["artist_types"] = item.get("artist_types", [])
@@ -155,6 +148,7 @@ class Engine:
                 facts.append(("era", era))
 
             entity["facts"] = facts
+
             entities.append(entity)
 
         return entities
@@ -169,8 +163,7 @@ class Engine:
         
         # If graph is empty or doesn't exist, build it
         if not graph.graph["songs"]:
-            print("🌐 Building dynamic Wikidata graph...")
-            from backend.logic.dynamic_graph import build_dynamic_graph
+            print(" Building dynamic Wikidata graph...")
             graph = build_dynamic_graph(limit=200)  # Start with 200 songs
             graph.save_graph(graph_path)
         
@@ -201,12 +194,10 @@ class Engine:
 
     def _initialize_beliefs(self) -> List[float]:
 
-        from backend.logic.belief import initialize_beliefs
         return initialize_beliefs(self.entities)
 
     def _generate_questions(self) -> List[Dict[str, Any]]:
 
-        from backend.logic.questions import generate_all_questions
         return generate_all_questions(self.entities)
 
     def get_entities(self) -> List[Dict[str, Any]]:
@@ -215,18 +206,19 @@ class Engine:
 
     def get_beliefs(self) -> List[float]:
 
+    def get_beliefs(self):
+
         return self.beliefs
 
-    def get_questions(self) -> List[Dict[str, Any]]:
+
+    def get_questions(self):
 
         return self.questions
 
-    def reload(self):
 
-        self.entities = self._load_entities()
-        self.beliefs = self._initialize_beliefs()
-        self.questions = self._generate_questions()
-        
-        if self.use_dynamic_graph:
-            self.dynamic_graph = self._load_dynamic_graph()
-            self._enhance_with_dynamic_graph()
+    def set_beliefs(self, beliefs):
+        """
+        Allows external update of belief state.
+        """
+
+        self.beliefs = beliefs
