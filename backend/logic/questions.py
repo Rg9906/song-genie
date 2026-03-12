@@ -364,177 +364,139 @@ def simulate_bayesian_update(songs, beliefs, feature, value, answer):
     return normalize(new_beliefs)
 
 
-def compute_answer_probability(songs, beliefs, feature, value, answer):
+def select_best_question(questions, songs, beliefs, asked, engine=None):
     """
-    Computes marginal probability of answer.
+    Select the best question using enhanced graph intelligence.
+    Now integrates better with dynamic graph and provides debugging output.
     """
+    if not songs:
+        return None
+    
+    # Filter out already asked questions
+    available_questions = [q for q in questions if (q["feature"], q["value"]) not in asked]
+    
+    if not available_questions:
+        return None
+    
+    # Calculate scores for each question
+    scored_questions = []
+    for question in available_questions:
+        score = calculate_question_score(question, songs, beliefs, engine)
+        question["score"] = score
+        question["debug_info"] = get_debug_info(question, songs, beliefs)
+        scored_questions.append(question)
+    
+    # Sort by score (highest first)
+    scored_questions.sort(key=lambda q: q["score"], reverse=True)
+    
+    # Get best question
+    best_question = scored_questions[0]
+    
+    # Debug output
+    print(f"🔍 Best Question Selected:")
+    print(f"   Question: {best_question['text']}")
+    print(f"   Feature: {best_question['feature']}")
+    print(f"   Value: {best_question['value']}")
+    print(f"   Score: {best_question['score']:.3f}")
+    print(f"   Covers: {best_question['debug_info']['covers_songs']} songs")
+    print(f"   Splits: {best_question['debug_info']['split_ratio']:.2f}")
+    print(f"   Entropy: {best_question['debug_info']['entropy']:.3f}")
+    
+    return best_question
 
-    prob = 0.0
-
-    for song in songs:
-
-        song_id = song["id"]
-
-        prior = beliefs[song_id]
-
-        facts = song.get("facts")
-        if facts is not None:
-            matches = (feature, value) in facts
-        else:
-            song_value = song.get(feature)
-
-            if isinstance(song_value, list):
-                matches = value in song_value
-            else:
-                matches = song_value == value
-
-        likelihood = compute_likelihood(matches, answer, feature=feature)
-
-        prob += prior * likelihood
-
-    return prob
-
-
-def score_question(question, songs, beliefs):
+def calculate_question_score(question, songs, beliefs, engine=None):
     """
-    Information gain score.
+    Calculate question score combining multiple factors.
+    Enhanced for better graph integration.
     """
-
     feature = question["feature"]
-
     value = question["value"]
-
-    current_entropy = entropy(beliefs.values())
-
-    p_yes = compute_answer_probability(
-        songs,
-        beliefs,
-        feature,
-        value,
-        "yes"
+    
+    # 1. Information gain (how well it splits candidates)
+    info_score = calculate_information_gain(feature, value, songs, beliefs)
+    
+    # 2. Feature weight (importance of this feature type)
+    feature_weight = FEATURE_WEIGHTS.get(feature, 0.5)
+    
+    # 3. Candidate reduction (how many songs it eliminates)
+    reduction_score = calculate_candidate_reduction(feature, value, songs, beliefs)
+    
+    # 4. Graph centrality (if graph is available)
+    centrality_score = 0.0
+    if engine and hasattr(engine, 'graph_system') and engine.graph_system:
+        centrality_score = calculate_graph_centrality(feature, value, engine.graph_system)
+    
+    # 5. Diversity bonus (prefer different feature types)
+    diversity_bonus = calculate_diversity_bonus(feature, beliefs)
+    
+    # Combine scores with weights
+    total_score = (
+        info_score * 0.3 +           # Information gain is most important
+        reduction_score * 0.25 +       # How well it reduces candidates
+        feature_weight * 0.2 +         # Feature importance
+        centrality_score * 0.15 +       # Graph centrality
+        diversity_bonus * 0.1            # Question diversity
     )
+    
+    return total_score
 
-    p_no = compute_answer_probability(
-        songs,
-        beliefs,
-        feature,
-        value,
-        "no"
+def calculate_information_gain(feature, value, songs, beliefs):
+    """Calculate information gain (entropy reduction) for this question."""
+    # Split songs by answer
+    yes_songs = []
+    no_songs = []
+    
+    for song in songs:
+        if matches_feature(song, feature, value):
+            yes_songs.append(song)
+        else:
+            no_songs.append(song)
+    
+    # Calculate entropy before and after
+    total_songs = len(songs)
+    entropy_before = calculate_entropy([total_songs])
+    entropy_after = (
+        (len(yes_songs) / total_songs) * calculate_entropy([len(yes_songs)]) +
+        (len(no_songs) / total_songs) * calculate_entropy([len(no_songs)])
     )
+    
+    # Information gain = reduction in entropy
+    return entropy_before - entropy_after
 
-    expected_entropy = 0.0
+def calculate_candidate_reduction(feature, value, songs, beliefs):
+    """Calculate how well this question reduces candidates."""
+    matches = sum(1 for song in songs if matches_feature(song, feature, value))
+    total = len(songs)
+    
+    # Ideal split is 50/50, so score based on how close to that
+    split_ratio = matches / total
+    if split_ratio > 0.5:
+        split_ratio = 1 - split_ratio
+    
+    return split_ratio * 2  # Normalize to 0-1 range
 
-    if p_yes > 0:
+def calculate_graph_centrality(feature, value, graph_system):
+    """Calculate centrality score for graph attributes."""
+    try:
+        # Get centrality metrics for this attribute
+        centrality = graph_system.get_attribute_centrality(feature, value)
+        if centrality:
+            # Higher centrality = more important attribute
+            return min(centrality.get('betweenness', 0) / 10, 1.0)
+    except:
+        pass
+    
+    return 0.0
 
-        yes_beliefs = simulate_bayesian_update(
-            songs,
-            beliefs,
-            feature,
-            value,
-            "yes"
-        )
-
-        expected_entropy += p_yes * entropy(yes_beliefs.values())
-
-    if p_no > 0:
-
-        no_beliefs = simulate_bayesian_update(
-            songs,
-            beliefs,
-            feature,
-            value,
-            "no"
-        )
-
-        expected_entropy += p_no * entropy(no_beliefs.values())
-
-    return current_entropy - expected_entropy
-
-
-def select_best_question(questions, songs, beliefs, asked):
-    """
-    Selects highest information gain question.
-    """
-
-    best_question = None
-
-    best_score = -1.0
-
-    for q in questions:
-
-        key = (q["feature"], q["value"])
-
-        if key in asked:
-            continue
-
-        score = score_question(q, songs, beliefs)
-
-        if score > best_score:
-
-            best_score = score
-
-            best_question = q
-
-    return best_question
-
-
-# Override with a sturdier Thompson Sampling policy (kept here so we don't have
-# to rewrite the file above; Python uses the last definition).
-from backend.logic.analytics import compute_question_stats  # noqa: E402
-from backend.logic.config import BANDIT_LAMBDA  # noqa: E402
-
-
-def select_best_question(questions, songs, beliefs, asked):
-    """
-    Pure information gain selection - no bandit to prevent bias
-    With logical filtering to prevent redundant questions
-    """
-    best_question = None
-    best_score = -1.0
-
-    # Extract answered features for logical filtering
-    answered_features = {}
-    for (feature, value) in asked:
-        if feature not in answered_features:
-            answered_features[feature] = []
-        answered_features[feature].append(value)
-
-    for q in questions:
-        key = (q["feature"], q["value"])
-        if key in asked:
-            continue
-
-        # Skip redundant questions based on logical filtering
-        feature = q["feature"]
-        value = q["value"]
-        
-        # Time period filtering
-        if feature in ["era", "decade"] and "era" in answered_features:
-            # If we already got an answer about era, don't ask other eras
-            continue
-        if feature == "year" and ("era" in answered_features or "decade" in answered_features):
-            # If we know era/decade, don't ask specific year
-            continue
-            
-        # Language filtering - if we know the language, don't ask other languages
-        if feature == "language" and "language" in answered_features:
-            continue
-            
-        # Country filtering - if we know the country, don't ask other countries  
-        if feature == "country" and "country" in answered_features:
-            continue
-
-        base_score = score_question(q, songs, beliefs)
-
-        # Apply heuristic feature preferences and diversity penalty so we
-        # don't spam the same kind of question (e.g. artist, country).
-        feature_weight = FEATURE_WEIGHTS.get(feature, 1.0)
-        asked_feature_count = sum(1 for (f, _) in asked if f == feature)
-        diversity_factor = 1.0 / (1.0 + asked_feature_count)
-        adjusted_score = base_score * feature_weight * diversity_factor
-
-        if adjusted_score > best_score:
-            best_score = adjusted_score
-            best_question = q
-
-    return best_question
+def calculate_diversity_bonus(feature, beliefs):
+    """Give bonus to diverse feature types."""
+    # Count how many times this feature has been asked
+    feature_count = sum(1 for f, _ in beliefs.get('asked_questions', []) if f == feature)
+    
+    # Fewer questions of this type = higher diversity bonus
+    if feature_count == 0:
+        return 0.2
+    elif feature_count == 1:
+        return 0.1
+    else:
+        return 0.0

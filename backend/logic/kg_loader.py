@@ -397,14 +397,67 @@ def normalize_results(results: Dict[str, Any]) -> List[Dict[str, Any]]:
 # -------------------------
 
 def load_dataset():
-
+    """Load existing dataset with validation."""
     path = get_data_path()
-
+    
     if not os.path.exists(path):
         return []
+    
+    try:
+        with open(path, "r", encoding="utf-8") as f:
+            songs = json.load(f)
+        
+        # Validate each song
+        validated_songs = []
+        for song in songs:
+            if validate_song(song):
+                validated_songs.append(song)
+            else:
+                print(f"Warning: Skipping invalid song: {song.get('title', 'Unknown')}")
+        
+        print(f"Loaded {len(validated_songs)} validated songs (skipped {len(songs) - len(validated_songs)} invalid)")
+        return validated_songs
+        
+    except Exception as e:
+        print(f"Error loading dataset: {e}")
+        return []
 
-    with open(path, "r", encoding="utf-8") as f:
-        return json.load(f)
+
+def validate_song(song):
+    """Validate a song dictionary."""
+    if not isinstance(song, dict):
+        return False
+    
+    # Required fields
+    required_fields = ['title', 'artists']
+    for field in required_fields:
+        if field not in song or not song[field]:
+            return False
+    
+    # Validate title
+    title = song.get('title', '')
+    if not isinstance(title, str) or len(title.strip()) == 0:
+        return False
+    
+    # Validate artists
+    artists = song.get('artists', [])
+    if not isinstance(artists, list) or len(artists) == 0:
+        return False
+    
+    for artist in artists:
+        if not isinstance(artist, str) or len(artist.strip()) == 0:
+            return False
+    
+    # Validate genres (optional but should be list if present)
+    genres = song.get('genres', [])
+    if genres is not None:
+        if not isinstance(genres, list):
+            return False
+        for genre in genres:
+            if not isinstance(genre, str) or len(genre.strip()) == 0:
+                return False
+    
+    return True
 
 
 # -------------------------

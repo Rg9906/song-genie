@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta
 import uuid
+import logging
 from typing import Tuple
 
 from flask import Flask, jsonify, request, send_from_directory
@@ -25,6 +26,10 @@ from backend.logic.config import (
 
 # Create Flask app
 app = Flask(__name__)
+
+# Configure logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(__name__)
 
 # ENABLE CORS (THIS FIXES "Backend unreachable")
 CORS(app)
@@ -308,6 +313,7 @@ def answer():
                 {
                     "song": id_to_song.get(song_id),
                     "probability": prob,
+                    "playback_url": f"/play_song/{song_id}"  # New: Add playback URL
                 }
                 for song_id, prob in top_candidates
                 if id_to_song.get(song_id) is not None
@@ -349,6 +355,44 @@ def answer():
         "text": question["text"]
 
     })
+
+
+# Play Song with Highest Probability
+@app.route("/play_song/<int:song_id>", methods=["GET"])
+def play_song(song_id):
+    """
+    Play the song with the highest probability after guess is complete.
+    Returns song details and a mock audio URL for demonstration.
+    """
+    try:
+        # Load all songs to find the requested song
+        from backend.logic.kg_loader import load_dataset
+        all_songs = load_dataset()
+        
+        # Find the song by ID
+        target_song = None
+        for song in all_songs:
+            if song.get("id") == song_id:
+                target_song = song
+                break
+        
+        if not target_song:
+            return jsonify({"error": "Song not found"}), 404
+        
+        # Return song details for playback
+        return jsonify({
+            "type": "playback",
+            "song": target_song,
+            "message": f"Now playing: {target_song['title']} by {', '.join(target_song['artists'])}",
+            "audio_url": f"https://example.com/audio/{song_id}.mp3",  # Mock URL
+            "duration": target_song.get("duration"),
+            "genres": target_song.get("genres", []),
+            "year": target_song.get("publication_date", "")[:4] if target_song.get("publication_date") else "Unknown"
+        })
+        
+    except Exception as e:
+        logger.error(f"Error in song playback: {e}")
+        return jsonify({"error": str(e)}), 500
 
 
 # Learn new song from Wikidata with smart pattern analysis

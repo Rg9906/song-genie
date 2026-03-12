@@ -229,7 +229,7 @@ class DynamicWikidataGraph:
                 }
                 for attr_type, values in self.graph["attributes"].items()
             },
-            "attribute_types": list(self.attribute_types)
+            "attribute_types": list(self.graph["attribute_types"])
         }
         
         with open(filepath, 'w', encoding='utf-8') as f:
