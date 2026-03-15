@@ -9,6 +9,55 @@ from typing import List, Dict, Any, Optional, Set, Tuple
 import logging
 import random
 import os
+from collections import Counter
+
+# Try to import intelligent selector
+try:
+    from .intelligent_question_selector import IntelligentQuestionSelector
+    INTELLIGENT_SELECTOR_AVAILABLE = True
+except ImportError:
+    INTELLIGENT_SELECTOR_AVAILABLE = False
+    logging.warning("Intelligent selector not available, using fallback")
+
+# Try to import diverse question generator
+try:
+    from .diverse_question_generator import DiverseQuestionGenerator
+    DIVERSE_GENERATOR_AVAILABLE = True
+except ImportError:
+    DIVERSE_GENERATOR_AVAILABLE = False
+    logging.warning("Diverse generator not available, using fallback")
+
+# Try to import LLM framer
+try:
+    from .free_llm_question_framer import FreeLLMQuestionFramer
+    LLM_FRAMER_AVAILABLE = True
+except ImportError:
+    LLM_FRAMER_AVAILABLE = False
+    logging.warning("LLM framer not available, using fallback")
+
+# Try to import dynamic AI engine
+try:
+    from .simple_dynamic_engine import SimpleDynamicEngine
+    DYNAMIC_AI_ENGINE_AVAILABLE = True
+except ImportError:
+    DYNAMIC_AI_ENGINE_AVAILABLE = False
+    logging.warning("Simple dynamic engine not available, using fallback")
+
+# Try to import free AI integrator
+try:
+    from .free_ai_integrator import FreeAIIntegrator
+    FREE_AI_AVAILABLE = True
+except ImportError:
+    FREE_AI_AVAILABLE = False
+    logging.warning("Free AI integrator not available, using fallback")
+
+# Try to import ultimate dynamic system
+try:
+    from .ultimate_dynamic_simple import UltimateDynamicSimple
+    ULTIMATE_DYNAMIC_AVAILABLE = True
+except ImportError:
+    ULTIMATE_DYNAMIC_AVAILABLE = False
+    logging.warning("Ultimate dynamic system not available, using fallback")
 
 logger = logging.getLogger(__name__)
 
@@ -19,6 +68,12 @@ class SimpleEnhancedAkenator:
         self.target_dataset_size = target_dataset_size
         self.songs = []
         self.beliefs = {}
+        self.intelligent_selector = None
+        self.diverse_generator = None
+        self.llm_framer = None
+        self.dynamic_ai_engine = None
+        self.free_ai_integrator = None
+        self.ultimate_dynamic_system = None
         
         # Initialize system
         self._initialize_system()
@@ -37,6 +92,76 @@ class SimpleEnhancedAkenator:
         
         # Initialize beliefs
         self.beliefs = {song['id']: 1.0/len(self.songs) for song in self.songs}
+        
+        # Initialize intelligent question selector
+        if INTELLIGENT_SELECTOR_AVAILABLE:
+            try:
+                self.intelligent_selector = IntelligentQuestionSelector(
+                    self.songs, 
+                    use_graph=True, 
+                    use_embeddings=False  # Set to True if you want embeddings
+                )
+                logger.info("🧠 Using intelligent question selector")
+            except Exception as e:
+                logger.warning(f"Failed to initialize intelligent selector: {e}")
+                self.intelligent_selector = None
+        else:
+            logger.info("📊 Using basic question selection")
+        
+        # Initialize diverse question generator
+        if DIVERSE_GENERATOR_AVAILABLE:
+            try:
+                self.diverse_generator = DiverseQuestionGenerator(self.songs)
+                logger.info("🎨 Using diverse question generator")
+            except Exception as e:
+                logger.warning(f"Failed to initialize diverse generator: {e}")
+                self.diverse_generator = None
+        else:
+            logger.info("📝 Using basic question generation")
+        
+        # Initialize LLM framer
+        if LLM_FRAMER_AVAILABLE:
+            try:
+                self.llm_framer = FreeLLMQuestionFramer(use_llm=False)  # Set to True to use actual LLM
+                logger.info("🗣️ Using LLM question framer")
+            except Exception as e:
+                logger.warning(f"Failed to initialize LLM framer: {e}")
+                self.llm_framer = None
+        else:
+            logger.info("💬 Using basic question framing")
+        
+        # Initialize dynamic AI engine
+        if DYNAMIC_AI_ENGINE_AVAILABLE:
+            try:
+                self.dynamic_ai_engine = SimpleDynamicEngine(self.songs)
+                logger.info("🤖 Using simple dynamic question engine")
+            except Exception as e:
+                logger.warning(f"Failed to initialize simple dynamic engine: {e}")
+                self.dynamic_ai_engine = None
+        else:
+            logger.info("📊 Using basic question engine")
+        
+        # Initialize free AI integrator
+        if FREE_AI_AVAILABLE:
+            try:
+                self.free_ai_integrator = FreeAIIntegrator()
+                logger.info("🌐 Using free AI integrator")
+            except Exception as e:
+                logger.warning(f"Failed to initialize free AI integrator: {e}")
+                self.free_ai_integrator = None
+        else:
+            logger.info("🔧 Using local generation only")
+        
+        # Initialize ultimate dynamic system
+        if ULTIMATE_DYNAMIC_AVAILABLE:
+            try:
+                self.ultimate_dynamic_system = UltimateDynamicSimple(self.songs)
+                logger.info("🚀 Using ultimate dynamic system")
+            except Exception as e:
+                logger.warning(f"Failed to initialize ultimate dynamic system: {e}")
+                self.ultimate_dynamic_system = None
+        else:
+            logger.info("📊 Using fallback systems")
         
         logger.info(f"✅ Simple Enhanced Akenator initialized with {len(self.songs)} songs")
     
@@ -204,7 +329,29 @@ class SimpleEnhancedAkenator:
         return self.beliefs
     
     def get_questions(self) -> List[Dict[str, Any]]:
-        """Get all possible questions"""
+        """Get questions using dynamic AI engine or fallback"""
+        if self.dynamic_ai_engine:
+            try:
+                questions = self.dynamic_ai_engine.generate_dynamic_questions(set(), max_questions=50)
+                logger.info(f"🤖 Generated {len(questions)} dynamic AI questions")
+                return questions
+            except Exception as e:
+                logger.warning(f"Dynamic AI engine failed: {e}")
+        
+        # Fallback to diverse generator
+        if self.diverse_generator:
+            try:
+                questions = self.diverse_generator.generate_diverse_questions(max_per_category=3)
+                logger.info(f"🎨 Generated {len(questions)} diverse questions")
+                return questions
+            except Exception as e:
+                logger.warning(f"Diverse generator failed: {e}")
+        
+        # Final fallback to basic question generation
+        return self._generate_basic_questions()
+    
+    def _generate_basic_questions(self) -> List[Dict[str, Any]]:
+        """Fallback basic question generation"""
         questions = []
         attribute_values = {}
         
@@ -286,10 +433,50 @@ class SimpleEnhancedAkenator:
             return str(song_value) == value
     
     def get_best_question(self, asked_questions: Set[Tuple[str, str]]) -> Optional[Dict[str, Any]]:
-        """Get best question using information gain"""
-        all_questions = self.get_questions()
+        """Get best question using ultimate dynamic system"""
+        # Try ultimate dynamic system first
+        if self.ultimate_dynamic_system:
+            try:
+                ultimate_questions = self.ultimate_dynamic_system.generate_ultimate_questions(
+                    asked_questions, self.beliefs, max_questions=10
+                )
+                if ultimate_questions:
+                    best_question = ultimate_questions[0]
+                    # Record usage
+                    self.ultimate_dynamic_system.record_question_asked(best_question)
+                    logger.debug(f"🚀 Ultimate question: {best_question['text']}")
+                    return best_question
+            except Exception as e:
+                logger.warning(f"Ultimate system failed: {e}")
         
-        # Filter out already asked questions
+        # Try simple dynamic engine
+        if self.dynamic_ai_engine:
+            try:
+                dynamic_questions = self.dynamic_ai_engine.generate_dynamic_questions(
+                    asked_questions, max_questions=10
+                )
+                if dynamic_questions:
+                    best_question = dynamic_questions[0]
+                    logger.debug(f"🤖 Dynamic question: {best_question['text']}")
+                    return best_question
+            except Exception as e:
+                logger.warning(f"Dynamic selection failed: {e}")
+        
+        # Try free AI integrator
+        if self.free_ai_integrator:
+            try:
+                ai_questions = self.free_ai_integrator.generate_dynamic_questions(
+                    self.songs, asked_questions
+                )
+                if ai_questions:
+                    best_question = ai_questions[0]
+                    logger.debug(f"🌐 Free AI question: {best_question['text']}")
+                    return best_question
+            except Exception as e:
+                logger.warning(f"Free AI selection failed: {e}")
+        
+        # Fallback to intelligent selector
+        all_questions = self.get_questions()
         available_questions = [
             q for q in all_questions 
             if (q['feature'], q['value']) not in asked_questions
@@ -298,14 +485,58 @@ class SimpleEnhancedAkenator:
         if not available_questions:
             return None
         
-        # Score questions using information gain
+        # Use intelligent selector if available
+        if self.intelligent_selector:
+            best_question = self.intelligent_selector.select_best_question(
+                available_questions, 
+                asked_questions, 
+                self.beliefs
+            )
+        else:
+            # Fallback to basic selection with diversity
+            best_question = self._fallback_question_selection(available_questions, asked_questions)
+        
+        if not best_question:
+            return None
+        
+        # Apply LLM framing if available
+        if self.llm_framer:
+            try:
+                framed_question = self.llm_framer.frame_question(best_question)
+                logger.debug(f"🗣️ Framed question: {framed_question['text']}")
+                return framed_question
+            except Exception as e:
+                logger.warning(f"LLM framing failed: {e}")
+        
+        return best_question
+    
+    def _fallback_question_selection(self, available_questions: List[Dict[str, Any]], 
+                                   asked_questions: Set[Tuple[str, str]]) -> Optional[Dict[str, Any]]:
+        """Fallback question selection with basic diversity"""
+        # Count asked questions by feature to ensure diversity
+        asked_features = Counter([q[0] for q in asked_questions])
+        
+        # Score questions using information gain + diversity penalty
         best_question = None
         best_score = -1.0
         
         for question in available_questions:
-            score = self._calculate_information_gain(question)
-            if score > best_score:
-                best_score = score
+            # Base information gain score
+            info_gain = self._calculate_information_gain(question)
+            
+            # Add diversity penalty (prefer features we haven't asked much)
+            feature = question['feature']
+            diversity_penalty = asked_features.get(feature, 0) * 0.1
+            
+            # Combined score
+            combined_score = info_gain - diversity_penalty
+            
+            # Bonus for asking different features
+            if asked_features.get(feature, 0) == 0:
+                combined_score += 0.01  # Small bonus for new features
+            
+            if combined_score > best_score:
+                best_score = combined_score
                 best_question = question
         
         return best_question

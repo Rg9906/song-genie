@@ -1,5 +1,5 @@
 """
-Music Akenator Flask App - CLEAN VERSION
+Music Akenator Flask App - FIXED VERSION
 Uses your verified enhanced system
 """
 
@@ -120,18 +120,13 @@ def start():
         
         logger.info(f"🚀 Starting new game with {target_size} songs")
         
-        session_id, session = session_manager.create(target_size)
+        session_id, session = session_manager.create(target_dataset_size)
         
         # Get first question
         best_question = session.akenator.get_best_question(session.asked)
         
         if best_question:
             session.asked.add((best_question["feature"], best_question["value"]))
-            session.history.append({
-                "feature": best_question["feature"],
-                "value": best_question["value"],
-                "text": best_question["text"]
-            })
             question_data = {
                 "feature": best_question["feature"],
                 "value": best_question["value"],
@@ -176,7 +171,7 @@ def answer():
             return jsonify({
                 "error": "Invalid or expired session",
                 "status": "error"
-            }), 400
+            }), 404
         
         if not session.akenator:
             return jsonify({
@@ -288,72 +283,26 @@ def answer():
 
 @app.route("/play_song/<int:song_id>", methods=["GET"])
 def play_song(song_id):
-    """Play the song with the highest probability after guess is complete."""
+    """Play song with highest probability after guess."""
     try:
-        # Load all songs to find the requested song
-        from backend.logic.kg_loader import load_dataset
-        all_songs = load_dataset()
+        # This is a placeholder - in real implementation, you would:
+        # 1. Look up the song in your database
+        # 2. Return actual audio file or streaming URL
         
-        # Find the song by ID
-        target_song = None
-        for song in all_songs:
-            if song.get("id") == song_id:
-                target_song = song
-                break
-        
-        if not target_song:
-            return jsonify({"error": "Song not found"}), 404
-        
-        # Return song details for playback
         return jsonify({
             "type": "playback",
-            "song": target_song,
-            "message": f"Now playing: {target_song['title']} by {', '.join(target_song['artists'])}",
-            "audio_url": f"https://example.com/audio/{song_id}.mp3",  # Mock URL
-            "duration": target_song.get("duration"),
-            "genres": target_song.get("genres", []),
-            "year": target_song.get("publication_date", "")[:4] if target_song.get("publication_date") else "Unknown"
-        })
-        
-    except Exception as e:
-        logger.error(f"Error in song playback: {e}")
-        return jsonify({"error": str(e)}), 500
-
-
-@app.route("/feedback", methods=["POST"])
-def feedback():
-    """Collect user feedback on the guess."""
-    try:
-        data = request.get_json()
-        session_id = data.get("session_id")
-        feedback_type = data.get("feedback")  # "correct" or "incorrect"
-        song_title = data.get("song_title")
-        
-        session = session_manager.get(session_id)
-        if not session:
-            return jsonify({"error": "Invalid session"}), 404
-        
-        # Log feedback for analytics
-        logger.info(f"📝 Feedback: {feedback_type} for song {song_title}")
-        
-        return jsonify({
-            "message": "Feedback recorded",
+            "song_id": song_id,
+            "message": f"Playing song {song_id}",
+            "audio_url": f"https://example.com/audio/{song_id}.mp3",
             "status": "success"
         })
         
     except Exception as e:
-        logger.error(f"Error recording feedback: {e}")
-        return jsonify({"error": str(e)}), 500
-
-
-@app.route("/health", methods=["GET"])
-def health():
-    """Health check endpoint."""
-    return jsonify({
-        "status": "ok",
-        "timestamp": datetime.utcnow().isoformat(),
-        "service": "Music Akenator Enhanced System"
-    })
+        logger.error(f"❌ Play song error: {e}")
+        return jsonify({
+            "error": str(e),
+            "status": "error"
+        }), 500
 
 
 @app.route("/status", methods=["GET"])
@@ -372,6 +321,7 @@ def status():
             "port": FLASK_PORT,
             "status": "success"
         })
+        
     except Exception as e:
         logger.error(f"❌ Status endpoint error: {e}")
         return jsonify({
@@ -380,32 +330,13 @@ def status():
         }), 500
 
 
-@app.route("/sessions", methods=["GET"])
-def list_sessions():
-    """List active sessions."""
-    sessions = []
-    for session_id, (session_obj, created_at) in session_manager._sessions.items():
-        sessions.append({
-            "session_id": session_id,
-            "created_at": created_at.isoformat(),
-            "questions_asked": len(session_obj.asked),
-            "songs_count": len(session_obj.songs)
-        })
-    return jsonify({"status": "success", "sessions": sessions})
-
-
-@app.route("/insights", methods=["GET"])
-def insights():
-    """Return basic question/guess insights."""
-    # Simple insights based on session statistics as placeholder
-    total_sessions = len(session_manager._sessions)
-    total_questions = sum(len(session_obj.asked) for session_obj, _ in session_manager._sessions.values())
+@app.route("/health", methods=["GET"])
+def health():
+    """Health check endpoint."""
     return jsonify({
-        "status": "success",
-        "total_sessions": total_sessions,
-        "total_questions": total_questions,
-        "avg_questions_per_session": (total_questions / total_sessions) if total_sessions > 0 else 0.0,
-        "message": "Basic insights endpoint"
+        "status": "healthy",
+        "timestamp": datetime.utcnow().isoformat(),
+        "service": "Music Akenator Enhanced System"
     })
 
 

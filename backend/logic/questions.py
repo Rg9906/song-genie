@@ -440,6 +440,14 @@ def calculate_question_score(question, songs, beliefs, engine=None):
     
     return total_score
 
+def matches_feature(song, feature, value):
+    """Return True if song matches this feature/value pair."""
+    song_value = song.get(feature)
+    if isinstance(song_value, list):
+        return value in song_value
+    return song_value == value
+
+
 def calculate_information_gain(feature, value, songs, beliefs):
     """Calculate information gain (entropy reduction) for this question."""
     # Split songs by answer

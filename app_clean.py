@@ -120,18 +120,13 @@ def start():
         
         logger.info(f"🚀 Starting new game with {target_size} songs")
         
-        session_id, session = session_manager.create(target_size)
+        session_id, session = session_manager.create(target_dataset_size)
         
         # Get first question
         best_question = session.akenator.get_best_question(session.asked)
         
         if best_question:
             session.asked.add((best_question["feature"], best_question["value"]))
-            session.history.append({
-                "feature": best_question["feature"],
-                "value": best_question["value"],
-                "text": best_question["text"]
-            })
             question_data = {
                 "feature": best_question["feature"],
                 "value": best_question["value"],
@@ -176,7 +171,7 @@ def answer():
             return jsonify({
                 "error": "Invalid or expired session",
                 "status": "error"
-            }), 400
+            }), 404
         
         if not session.akenator:
             return jsonify({
@@ -350,7 +345,7 @@ def feedback():
 def health():
     """Health check endpoint."""
     return jsonify({
-        "status": "ok",
+        "status": "healthy",
         "timestamp": datetime.utcnow().isoformat(),
         "service": "Music Akenator Enhanced System"
     })
@@ -372,41 +367,13 @@ def status():
             "port": FLASK_PORT,
             "status": "success"
         })
+        
     except Exception as e:
         logger.error(f"❌ Status endpoint error: {e}")
         return jsonify({
             "error": str(e),
             "status": "error"
         }), 500
-
-
-@app.route("/sessions", methods=["GET"])
-def list_sessions():
-    """List active sessions."""
-    sessions = []
-    for session_id, (session_obj, created_at) in session_manager._sessions.items():
-        sessions.append({
-            "session_id": session_id,
-            "created_at": created_at.isoformat(),
-            "questions_asked": len(session_obj.asked),
-            "songs_count": len(session_obj.songs)
-        })
-    return jsonify({"status": "success", "sessions": sessions})
-
-
-@app.route("/insights", methods=["GET"])
-def insights():
-    """Return basic question/guess insights."""
-    # Simple insights based on session statistics as placeholder
-    total_sessions = len(session_manager._sessions)
-    total_questions = sum(len(session_obj.asked) for session_obj, _ in session_manager._sessions.values())
-    return jsonify({
-        "status": "success",
-        "total_sessions": total_sessions,
-        "total_questions": total_questions,
-        "avg_questions_per_session": (total_questions / total_sessions) if total_sessions > 0 else 0.0,
-        "message": "Basic insights endpoint"
-    })
 
 
 # Error handlers
