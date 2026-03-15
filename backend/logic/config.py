@@ -61,4 +61,3 @@ WIKIDATA_SPARQL_URL: str = "https://query.wikidata.org/sparql"
 BANDIT_LAMBDA: float = float(os.getenv("SONG_GENIE_BANDIT_LAMBDA", "0.0"))
 # Cache analytics (disk) reads for this many seconds.
 ANALYTICS_CACHE_SECONDS: int = int(os.getenv("SONG_GENIE_ANALYTICS_CACHE_SECONDS", "5"))
-
