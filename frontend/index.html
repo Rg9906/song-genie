@@ -1,69 +1,127 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Song Genie</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Song Genie - Music Guessing Game</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
+    <div class="container">
+        <header class="header">
+            <div class="header-content">
+                <h1 class="logo">
+                    <span class="logo-icon"> musical note</span>
+                    Song Genie
+                </h1>
+                <button id="theme-toggle" class="theme-toggle" aria-label="Toggle theme">
+                    <span class="theme-icon-light"> sun</span>
+                    <span class="theme-icon-dark"> moon</span>
+                </button>
+            </div>
+        </header>
 
-<h2 id="question">Loading...</h2>
+        <main class="main">
+            <div class="game-container">
+                <div class="question-section">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progress-fill"></div>
+                        <span class="progress-text" id="progress-text">Question <span id="current-question">1</span></span>
+                    </div>
+                    
+                    <div class="question-card">
+                        <div class="question-number" id="question-counter">Question 1</div>
+                        <h2 class="question-text" id="question-text">Think of a song, and I'll try to guess it...</h2>
+                    </div>
+                </div>
 
-<button onclick="sendAnswer('yes')">Yes</button>
-<button onclick="sendAnswer('no')">No</button>
-<button onclick="sendAnswer('unsure')">Unsure</button>
+                <div class="answers-section" id="answers-section">
+                    <div class="answer-buttons">
+                        <button class="answer-btn yes-btn" onclick="sendAnswer('yes')" disabled>
+                            <span class="btn-icon"> check</span>
+                            Yes
+                        </button>
+                        <button class="answer-btn no-btn" onclick="sendAnswer('no')" disabled>
+                            <span class="btn-icon"> close</span>
+                            No
+                        </button>
+                        <button class="answer-btn unsure-btn" onclick="sendAnswer('unsure')" disabled>
+                            <span class="btn-icon"> help</span>
+                            Unsure
+                        </button>
+                    </div>
+                </div>
 
-<pre id="output"></pre>
+                <div class="result-section" id="result-section" style="display: none;">
+                    <div class="result-card">
+                        <div class="result-icon" id="result-icon"> musical note</div>
+                        <h3 class="result-title" id="result-title">I'm making a guess...</h3>
+                        <p class="result-text" id="result-text">Analyzing your answers...</p>
+                        <div class="confidence-bar">
+                            <div class="confidence-fill" id="confidence-fill"></div>
+                            <span class="confidence-text" id="confidence-text">Confidence: 0%</span>
+                        </div>
+                        <button class="play-again-btn" onclick="startGame()">Play Again</button>
+                    </div>
+                </div>
 
-<script>
-let session_id = null;
-let currentType = null;
+                <div class="learning-section" id="learning-section" style="display: none;">
+                    <div class="learning-card">
+                        <div class="learning-icon"> brain</div>
+                        <h3 class="learning-title">I couldn't find your song!</h3>
+                        <p class="learning-text">After 20 questions, here are my closest matches:</p>
+                        
+                        <div class="closest-matches" id="closest-matches">
+                            <!-- Matches will be populated by JavaScript -->
+                        </div>
+                        
+                        <div class="confirmation-section">
+                            <h4 class="confirmation-title">Am I right?</h4>
+                            <div class="confirmation-buttons">
+                                <button class="confirm-btn yes-confirm-btn" onclick="confirmCorrect()">Yes</button>
+                                <button class="confirm-btn no-confirm-btn" onclick="confirmIncorrect()">No</button>
+                            </div>
+                        </div>
+                        
+                        <div class="user-input-section">
+                            <h4 class="input-title">What song were you thinking of?</h4>
+                            <input type="text" id="user-song-input" class="song-input" placeholder="Enter song name and artist...">
+                            <button class="submit-song-btn" onclick="submitUserSong()">Submit</button>
+                        </div>
+                        
+                        <button class="play-again-btn" onclick="startGame()">Try Again</button>
+                    </div>
+                </div>
+            </div>
 
-async function startGame() {
-    const res = await fetch("/start");
-    const data = await res.json();
-    session_id = data.session_id;
-    handleResponse(data.data);
-}
+            <div class="stats-sidebar">
+                <div class="stats-card">
+                    <h3 class="stats-title">Game Stats</h3>
+                    <div class="stat-item">
+                        <span class="stat-label">Question</span>
+                        <span class="stat-value" id="question-number">1</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Questions Asked</span>
+                        <span class="stat-value" id="questions-count">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Session ID</span>
+                        <span class="stat-value" id="session-id">-</span>
+                    </div>
+                </div>
 
-async function sendAnswer(answer) {
-    const res = await fetch("/answer", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-            session_id: session_id,
-            answer: answer
-        })
-    });
+                <div class="top-candidates" id="top-candidates" style="display: none;">
+                    <h3 class="candidates-title">Top Candidates</h3>
+                    <div class="candidates-list" id="candidates-list"></div>
+                </div>
+            </div>
+        </main>
+    </div>
 
-    const data = await res.json();
-    handleResponse(data);
-}
-
-function handleResponse(data) {
-    currentType = data.type;
-
-    if (data.type === "question") {
-        document.getElementById("question").innerText =
-            data.question.text;
-    }
-
-    else if (data.type === "guess") {
-        document.getElementById("question").innerText =
-            `🎯 I guess: Song ID ${data.song_id} (confidence ${data.confidence.toFixed(2)})`;
-        document.getElementById("output").innerText =
-            JSON.stringify(data.top_candidates, null, 2);
-    }
-
-    else if (data.type === "learn") {
-        document.getElementById("question").innerText =
-            "🤔 I couldn’t guess your song.";
-        document.getElementById("output").innerText =
-            JSON.stringify(data.inferred_features, null, 2);
-    }
-}
-
-startGame();
-</script>
-
-</body>
+    <script src="script.js"></script>
+    </body>
 </html>
